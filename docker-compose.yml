@@ -6,6 +6,7 @@ networks:
 
 services:
   headless-browser:
+    container_name: headless-browser
     image: chromedp/headless-shell:latest
     ports:
       - 9222:9222
@@ -13,6 +14,7 @@ services:
       - backend
 
   workspace:
+    container_name: workspace
     build: .
     tty: true
     volumes:

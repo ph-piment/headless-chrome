@@ -6,24 +6,30 @@ import (
 	"context"
 	"flag"
 	"log"
-	"net/http"
+	"os/exec"
 	"encoding/json"
+	"io"
+	"strings"
 
 	"github.com/chromedp/chromedp"
 )
 
 func getDebugURL() string {
-	resp, err := http.Get("http://172.19.0.2:9222/json/version")
-	if err != nil {
-		log.Fatal(err)
-	}
+	ws := "ws://"
+	domain := "headless-browser:9222"
+	jsonPath := domain + "/json/version"
+	cmd := exec.Command("curl", "-H", "host:", jsonPath)
+	stdin, _ := cmd.StdinPipe()
+	io.WriteString(stdin, "hoge")
+	stdin.Close()
+	out, _ := cmd.Output()
 
 	var result map[string]interface{}
 
-	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+	if err := json.Unmarshal([]byte(out), &result); err != nil {
 		log.Fatal(err)
 	}
-	return result["webSocketDebuggerUrl"].(string)
+	return ws + domain + strings.Replace(result["webSocketDebuggerUrl"].(string), ws, "", 1)
 }
 
 var flagDevToolWsUrl = flag.String("devtools-ws-url", getDebugURL(), "DevTools WebSsocket URL")
