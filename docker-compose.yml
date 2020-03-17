@@ -1,0 +1,25 @@
+version: '3.7'
+
+networks:
+  backend:
+    driver: bridge
+
+services:
+  headless-browser:
+    container_name: headless-browser
+    image: chromedp/headless-shell:latest
+    ports:
+      - 9222:9222
+    networks:
+      - backend
+
+  workspace:
+    container_name: workspace
+    build: .
+    tty: true
+    volumes:
+      - .:/go/src/work
+    depends_on:
+      - headless-browser
+    networks:
+      - backend
