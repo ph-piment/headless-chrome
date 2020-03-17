@@ -7,18 +7,16 @@ networks:
 services:
   headless-browser:
     container_name: headless-browser
-    image: chromedp/headless-shell:latest
-    ports:
-      - 9222:9222
+    build: ./headless-browser
     networks:
       - backend
 
   workspace:
     container_name: workspace
-    build: .
+    build: ./go
     tty: true
     volumes:
-      - .:/go/src/work
+      - ../code/go:/go/src/work
     depends_on:
       - headless-browser
     networks:
