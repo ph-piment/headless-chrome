@@ -15,7 +15,7 @@ services:
 
   workspace:
     container_name: workspace
-    build: .
+    build: ./docker/go
     tty: true
     volumes:
       - .:/go/src/work
