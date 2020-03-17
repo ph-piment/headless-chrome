@@ -7,9 +7,7 @@ networks:
 services:
   headless-browser:
     container_name: headless-browser
-    image: chromedp/headless-shell:latest
-    ports:
-      - 9222:9222
+    build: ./headless-browser
     networks:
       - backend
 
