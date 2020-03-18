@@ -6,43 +6,27 @@ import (
 	"context"
 	"flag"
 	"log"
-	"os/exec"
-	"encoding/json"
-	"io"
-	"strings"
+
+	"github.com/ph-piment/headless-chrome/code/go/browser"
 
 	"github.com/chromedp/chromedp"
 )
 
-func getDebugURL() string {
-	ws := "ws://"
-	domain := "headless-browser:9222"
-	jsonPath := domain + "/json/version"
-	cmd := exec.Command("curl", "-H", "host:", jsonPath)
-	stdin, _ := cmd.StdinPipe()
-	io.WriteString(stdin, "hoge")
-	stdin.Close()
-	out, _ := cmd.Output()
-
-	var result map[string]interface{}
-
-	if err := json.Unmarshal([]byte(out), &result); err != nil {
-		log.Fatal(err)
-	}
-	return ws + domain + strings.Replace(result["webSocketDebuggerUrl"].(string), ws, "", 1)
-}
-
-var flagDevToolWsUrl = flag.String("devtools-ws-url", getDebugURL(), "DevTools WebSsocket URL")
-
 func main() {
 	flag.Parse()
 
-	if *flagDevToolWsUrl == "" {
+	devtoolsEndpoint, err := browser.GetDevtoolsEndpoint()
+	if err != nil {
+		log.Fatal("must get devtools endpoint")
+	}
+
+	flagDevToolWsURL := flag.String("devtools-ws-url", devtoolsEndpoint, "DevTools WebSsocket URL")
+	if *flagDevToolWsURL == "" {
 		log.Fatal("must specify -devtools-ws-url")
 	}
 
 	// create allocator context for use with creating a browser context later
-	allocatorContext, cancel := chromedp.NewRemoteAllocator(context.Background(), *flagDevToolWsUrl)
+	allocatorContext, cancel := chromedp.NewRemoteAllocator(context.Background(), *flagDevToolWsURL)
 	defer cancel()
 
 	// create context
