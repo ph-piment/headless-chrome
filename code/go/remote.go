@@ -5,21 +5,25 @@ package main
 import (
 	"context"
 	"flag"
+	"io/ioutil"
 	"log"
+	"math"
 
 	"github.com/ph-piment/headless-chrome/code/go/browser"
 
+	"github.com/chromedp/cdproto/emulation"
+	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
 )
 
 func main() {
-	ctxt, allocCancel, ctxtCancel := getContext()
+	ctx, allocCancel, ctxtCancel := getContext()
 	defer allocCancel()
 	defer ctxtCancel()
 
 	// run task list
 	var body string
-	if err := chromedp.Run(ctxt,
+	if err := chromedp.Run(ctx,
 		chromedp.Navigate("https://duckduckgo.com"),
 		chromedp.WaitVisible("#logo_homepage_link"),
 		chromedp.OuterHTML("html", &body),
@@ -29,6 +33,23 @@ func main() {
 
 	log.Println("Body of duckduckgo.com starts with:")
 	log.Println(body[0:100])
+
+	// capture screenshot of an element
+	var buf []byte
+	if err := chromedp.Run(ctx, elementScreenshot(`https://www.google.com/`, `#main`, &buf)); err != nil {
+		log.Fatal(err)
+	}
+	if err := ioutil.WriteFile("elementScreenshot.png", buf, 0644); err != nil {
+		log.Fatal(err)
+	}
+
+	// capture entire browser viewport, returning png with quality=90
+	if err := chromedp.Run(ctx, fullScreenshot(`https://www.google.com/`, 90, &buf)); err != nil {
+		log.Fatal(err)
+	}
+	if err := ioutil.WriteFile("fullScreenshot.png", buf, 0644); err != nil {
+		log.Fatal(err)
+	}
 }
 
 // TODO: move ...
@@ -59,4 +80,59 @@ func getDevToolWsURL() string {
 	}
 
 	return *flagDevToolWsURL
+}
+
+// elementScreenshot takes a screenshot of a specific element.
+func elementScreenshot(urlstr, sel string, res *[]byte) chromedp.Tasks {
+	return chromedp.Tasks{
+		chromedp.Navigate(urlstr),
+		chromedp.WaitVisible(sel, chromedp.ByID),
+		chromedp.Screenshot(sel, res, chromedp.NodeVisible, chromedp.ByID),
+	}
+}
+
+// fullScreenshot takes a screenshot of the entire browser viewport.
+//
+// Liberally copied from puppeteer's source.
+//
+// Note: this will override the viewport emulation settings.
+func fullScreenshot(urlstr string, quality int64, res *[]byte) chromedp.Tasks {
+	return chromedp.Tasks{
+		chromedp.Navigate(urlstr),
+		chromedp.ActionFunc(func(ctx context.Context) error {
+			// get layout metrics
+			_, _, contentSize, err := page.GetLayoutMetrics().Do(ctx)
+			if err != nil {
+				return err
+			}
+
+			width, height := int64(math.Ceil(contentSize.Width)), int64(math.Ceil(contentSize.Height))
+
+			// force viewport emulation
+			err = emulation.SetDeviceMetricsOverride(width, height, 1, false).
+				WithScreenOrientation(&emulation.ScreenOrientation{
+					Type:  emulation.OrientationTypePortraitPrimary,
+					Angle: 0,
+				}).
+				Do(ctx)
+			if err != nil {
+				return err
+			}
+
+			// capture screenshot
+			*res, err = page.CaptureScreenshot().
+				WithQuality(quality).
+				WithClip(&page.Viewport{
+					X:      contentSize.X,
+					Y:      contentSize.Y,
+					Width:  contentSize.Width,
+					Height: contentSize.Height,
+					Scale:  1,
+				}).Do(ctx)
+			if err != nil {
+				return err
+			}
+			return nil
+		}),
+	}
 }
