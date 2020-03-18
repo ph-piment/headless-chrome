@@ -13,20 +13,10 @@ import (
 )
 
 func main() {
-	flag.Parse()
-
-	devtoolsEndpoint, err := browser.GetDevtoolsEndpoint()
-	if err != nil {
-		log.Fatal("must get devtools endpoint")
-	}
-
-	flagDevToolWsURL := flag.String("devtools-ws-url", devtoolsEndpoint, "DevTools WebSsocket URL")
-	if *flagDevToolWsURL == "" {
-		log.Fatal("must specify -devtools-ws-url")
-	}
+	devToolWsURL := getDevToolWsURL()
 
 	// create allocator context for use with creating a browser context later
-	allocatorContext, cancel := chromedp.NewRemoteAllocator(context.Background(), *flagDevToolWsURL)
+	allocatorContext, cancel := chromedp.NewRemoteAllocator(context.Background(), devToolWsURL)
 	defer cancel()
 
 	// create context
@@ -45,4 +35,21 @@ func main() {
 
 	log.Println("Body of duckduckgo.com starts with:")
 	log.Println(body[0:100])
+}
+
+// TODO: move browser package.
+func getDevToolWsURL() string {
+	flag.Parse()
+
+	devtoolsEndpoint, err := browser.GetDevtoolsEndpoint()
+	if err != nil {
+		log.Fatal("must get devtools endpoint")
+	}
+
+	flagDevToolWsURL := flag.String("devtools-ws-url", devtoolsEndpoint, "DevTools WebSsocket URL")
+	if *flagDevToolWsURL == "" {
+		log.Fatal("must specify -devtools-ws-url")
+	}
+
+	return *flagDevToolWsURL
 }
