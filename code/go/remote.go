@@ -13,15 +13,9 @@ import (
 )
 
 func main() {
-	devToolWsURL := getDevToolWsURL()
-
-	// create allocator context for use with creating a browser context later
-	allocatorContext, cancel := chromedp.NewRemoteAllocator(context.Background(), devToolWsURL)
-	defer cancel()
-
-	// create context
-	ctxt, cancel := chromedp.NewContext(allocatorContext)
-	defer cancel()
+	ctxt, allocCancel, ctxtCancel := getContext()
+	defer allocCancel()
+	defer ctxtCancel()
 
 	// run task list
 	var body string
@@ -35,6 +29,19 @@ func main() {
 
 	log.Println("Body of duckduckgo.com starts with:")
 	log.Println(body[0:100])
+}
+
+// TODO: move ...
+func getContext() (context.Context, context.CancelFunc, context.CancelFunc) {
+	devToolWsURL := getDevToolWsURL()
+
+	// create allocator context for use with creating a browser context later
+	allocatorContext, allocCancel := chromedp.NewRemoteAllocator(context.Background(), devToolWsURL)
+
+	// create context
+	ctxt, ctxtCancel := chromedp.NewContext(allocatorContext)
+
+	return ctxt, allocCancel, ctxtCancel
 }
 
 // TODO: move browser package.
