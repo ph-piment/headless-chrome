@@ -36,20 +36,24 @@ func main() {
 
 	// capture screenshot of an element
 	var buf []byte
-	if err := chromedp.Run(ctx, elementScreenshot(`https://www.google.com/`, `#main`, &buf)); err != nil {
+	log.Println("buf start")
+	if err := chromedp.Run(ctx, fullScreenshot(`https://www.google.com/`, 10, &buf)); err != nil {
 		log.Fatal(err)
 	}
-	if err := ioutil.WriteFile("elementScreenshot.png", buf, 0644); err != nil {
+	if err := ioutil.WriteFile("google.png", buf, 0644); err != nil {
 		log.Fatal(err)
 	}
+	log.Println("buf done")
 
-	// capture entire browser viewport, returning png with quality=90
-	if err := chromedp.Run(ctx, fullScreenshot(`https://www.google.com/`, 90, &buf)); err != nil {
+	var buf2 []byte
+	log.Println("buf2 start")
+	if err := chromedp.Run(ctx, fullScreenshot(`http://abehiroshi.la.coocan.jp/`, 10, &buf2)); err != nil {
 		log.Fatal(err)
 	}
-	if err := ioutil.WriteFile("fullScreenshot.png", buf, 0644); err != nil {
+	if err := ioutil.WriteFile("abe.png", buf2, 0644); err != nil {
 		log.Fatal(err)
 	}
+	log.Println("buf2 done")
 }
 
 // TODO: move ...
@@ -82,15 +86,6 @@ func getDevToolWsURL() string {
 	return *flagDevToolWsURL
 }
 
-// elementScreenshot takes a screenshot of a specific element.
-func elementScreenshot(urlstr, sel string, res *[]byte) chromedp.Tasks {
-	return chromedp.Tasks{
-		chromedp.Navigate(urlstr),
-		chromedp.WaitVisible(sel, chromedp.ByID),
-		chromedp.Screenshot(sel, res, chromedp.NodeVisible, chromedp.ByID),
-	}
-}
-
 // fullScreenshot takes a screenshot of the entire browser viewport.
 //
 // Liberally copied from puppeteer's source.
@@ -99,12 +94,15 @@ func elementScreenshot(urlstr, sel string, res *[]byte) chromedp.Tasks {
 func fullScreenshot(urlstr string, quality int64, res *[]byte) chromedp.Tasks {
 	return chromedp.Tasks{
 		chromedp.Navigate(urlstr),
+//		chromedp.WaitVisible(`#Footer`),
 		chromedp.ActionFunc(func(ctx context.Context) error {
 			// get layout metrics
 			_, _, contentSize, err := page.GetLayoutMetrics().Do(ctx)
 			if err != nil {
 				return err
 			}
+			log.Println(contentSize)
+			log.Println("GetLayoutMetrics done")
 
 			width, height := int64(math.Ceil(contentSize.Width)), int64(math.Ceil(contentSize.Height))
 
@@ -118,6 +116,7 @@ func fullScreenshot(urlstr string, quality int64, res *[]byte) chromedp.Tasks {
 			if err != nil {
 				return err
 			}
+			log.Println("SetDeviceMetricsOverride done")
 
 			// capture screenshot
 			*res, err = page.CaptureScreenshot().
