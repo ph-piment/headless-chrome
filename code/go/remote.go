@@ -39,7 +39,7 @@ func main() {
 	if err := chromedp.Run(ctx, fullScreenshot(img1, 90, &buf)); err != nil {
 		log.Fatal(err)
 	}
-	if err := ioutil.WriteFile("image1.png", buf, 0644); err != nil {
+	if err := ioutil.WriteFile("./outputs/images/compare/source/image1.png", buf, 0644); err != nil {
 		log.Fatal(err)
 	}
 
@@ -47,7 +47,7 @@ func main() {
 	if err := chromedp.Run(ctx, fullScreenshot(img2, 90, &buf)); err != nil {
 		log.Fatal(err)
 	}
-	if err := ioutil.WriteFile("image2.png", buf, 0644); err != nil {
+	if err := ioutil.WriteFile("./outputs/images/compare/target/image2.png", buf, 0644); err != nil {
 		log.Fatal(err)
 	}
 }
