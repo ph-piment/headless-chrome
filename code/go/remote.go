@@ -21,19 +21,6 @@ func main() {
 	defer allocCancel()
 	defer ctxtCancel()
 
-	// run task list
-	var body string
-	if err := chromedp.Run(ctx,
-		chromedp.Navigate("https://duckduckgo.com"),
-		chromedp.WaitVisible("#logo_homepage_link"),
-		chromedp.OuterHTML("html", &body),
-	); err != nil {
-		log.Fatalf("Failed getting body of duckduckgo.com: %v", err)
-	}
-
-	log.Println("Body of duckduckgo.com starts with:")
-	log.Println(body[0:100])
-
 	// capture screenshot of an element
 	CaptureScreenshotList := []map[string]string{
 		{
