@@ -5,11 +5,14 @@ package main
 import (
 	"context"
 	"flag"
+	"io"
 	"io/ioutil"
 	"log"
 	"math"
 	"os"
 	"image"
+	"image/color"
+	"image/png"
 	"path/filepath"
 
 	"github.com/pkg/errors"
@@ -19,7 +22,11 @@ import (
 	"github.com/chromedp/cdproto/emulation"
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
+
+	"github.com/orisano/pixelmatch"
 )
+
+type colorValue color.RGBA
 
 func main() {
 	flag.Parse()
@@ -39,7 +46,12 @@ func main() {
 	if err := chromedp.Run(ctx, fullScreenshot(img1, 90, &buf)); err != nil {
 		log.Fatal(err)
 	}
-	if err := ioutil.WriteFile(compareDir + "/source/image1.png", buf, 0644); err != nil {
+	sourceImagePath := compareDir + "/source/image.png"
+	if err := ioutil.WriteFile(sourceImagePath, buf, 0644); err != nil {
+		log.Fatal(err)
+	}
+	img1file, err := openImage(sourceImagePath)
+	if err != nil {
 		log.Fatal(err)
 	}
 
@@ -47,11 +59,51 @@ func main() {
 	if err := chromedp.Run(ctx, fullScreenshot(img2, 90, &buf)); err != nil {
 		log.Fatal(err)
 	}
-	if err := ioutil.WriteFile(compareDir + "/target/image2.png", buf, 0644); err != nil {
+	targetImagePath := compareDir + "/target/image.png"
+	if err := ioutil.WriteFile(targetImagePath, buf, 0644); err != nil {
+		log.Fatal(err)
+	}
+	img2file, err := openImage(targetImagePath)
+	if err != nil {
 		log.Fatal(err)
 	}
 
 	// compare
+	threshold := flag.Float64("threshold", 0.1, "threshold")
+	aa := flag.Bool("aa", false, "ignore anti alias pixel")
+	alpha := flag.Float64("alpha", 0.1, "alpha")
+	antiAliased := colorValue(color.RGBA{R: 255, G: 255})
+	diffColor := colorValue(color.RGBA{R: 255})
+	var out image.Image
+	opts := []pixelmatch.MatchOption{
+		pixelmatch.Threshold(*threshold),
+		pixelmatch.Alpha(*alpha),
+		pixelmatch.AntiAliasedColor(color.RGBA(antiAliased)),
+		pixelmatch.DiffColor(color.RGBA(diffColor)),
+		pixelmatch.WriteTo(&out),
+	}
+	if *aa {
+		opts = append(opts, pixelmatch.IncludeAntiAlias)
+	}
+
+	_, err = pixelmatch.MatchPixel(img1file, img2file, opts...)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var w io.Writer
+	f, err := os.Create(compareDir + "/result/image.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+	w = f
+
+	var encErr error
+	encErr = png.Encode(w, out)
+	if encErr != nil {
+		log.Fatal(err)
+	}
 }
 
 // TODO: move ...
