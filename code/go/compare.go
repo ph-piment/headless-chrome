@@ -8,6 +8,11 @@ import (
 	"io/ioutil"
 	"log"
 	"math"
+	"os"
+	"image"
+	"path/filepath"
+
+	"github.com/pkg/errors"
 
 	"github.com/ph-piment/headless-chrome/code/go/browser"
 
@@ -17,46 +22,36 @@ import (
 )
 
 func main() {
+	flag.Parse()
+	args := flag.Args()
+	if len(args) != 2 {
+		log.Fatal("Usage of pixelmatch [flags] image1 image2 :")
+	}
+	img1 := args[0]
+	img2 := args[1]
+
 	ctx, allocCancel, ctxtCancel := getContext()
 	defer allocCancel()
 	defer ctxtCancel()
 
-	// run task list
-	var body string
-	if err := chromedp.Run(ctx,
-		chromedp.Navigate("https://duckduckgo.com"),
-		chromedp.WaitVisible("#logo_homepage_link"),
-		chromedp.OuterHTML("html", &body),
-	); err != nil {
-		log.Fatalf("Failed getting body of duckduckgo.com: %v", err)
-	}
-
-	log.Println("Body of duckduckgo.com starts with:")
-	log.Println(body[0:100])
-
-	// capture screenshot of an element
-	CaptureScreenshotList := []map[string]string{
-		{
-			"url": "https://www.google.com/",
-			"image": "google.png",
-		},
-		{
-			"url": "https://www.yahoo.com/",
-			"image": "yahoo.png",
-		},
-	}
-
+	compareDir := filepath.Dir("/go/src/work/outputs/images/compare/")
 	var buf []byte
-	for index, CaptureScreenshot := range CaptureScreenshotList {
-		log.Println("start index:", index)
-		if err := chromedp.Run(ctx, fullScreenshot(CaptureScreenshot["url"], 90, &buf)); err != nil {
-			log.Fatal(err)
-		}
-		if err := ioutil.WriteFile(CaptureScreenshot["image"], buf, 0644); err != nil {
-			log.Fatal(err)
-		}
-		log.Println("done index:", index)
+	if err := chromedp.Run(ctx, fullScreenshot(img1, 90, &buf)); err != nil {
+		log.Fatal(err)
 	}
+	if err := ioutil.WriteFile(compareDir + "/source/image1.png", buf, 0644); err != nil {
+		log.Fatal(err)
+	}
+
+	buf = nil
+	if err := chromedp.Run(ctx, fullScreenshot(img2, 90, &buf)); err != nil {
+		log.Fatal(err)
+	}
+	if err := ioutil.WriteFile(compareDir + "/target/image2.png", buf, 0644); err != nil {
+		log.Fatal(err)
+	}
+
+	// compare
 }
 
 // TODO: move ...
@@ -133,4 +128,18 @@ func fullScreenshot(urlstr string, quality int64, res *[]byte) chromedp.Tasks {
 			return nil
 		}),
 	}
+}
+
+func openImage(path string) (image.Image, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to open")
+	}
+	defer f.Close()
+
+	img, _, err := image.Decode(f)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to decode image")
+	}
+	return img, nil
 }
