@@ -8,6 +8,10 @@ import (
 	"io/ioutil"
 	"log"
 	"math"
+	"os"
+	"image"
+
+	"github.com/pkg/errors"
 
 	"github.com/ph-piment/headless-chrome/code/go/browser"
 
@@ -17,32 +21,34 @@ import (
 )
 
 func main() {
+	flag.Parse()
+	args := flag.Args()
+	if len(args) != 2 {
+		log.Fatal("Usage of pixelmatch [flags] image1 image2 :")
+	}
+	img1 := args[0]
+	img2 := args[1]
+	log.Println("img1:", img1)
+	log.Println("img2:", img2)
+
 	ctx, allocCancel, ctxtCancel := getContext()
 	defer allocCancel()
 	defer ctxtCancel()
 
-	// capture screenshot of an element
-	CaptureScreenshotList := []map[string]string{
-		{
-			"url": "https://www.google.com/",
-			"image": "google.png",
-		},
-		{
-			"url": "https://www.yahoo.com/",
-			"image": "yahoo.png",
-		},
+	var buf []byte
+	if err := chromedp.Run(ctx, fullScreenshot(img1, 90, &buf)); err != nil {
+		log.Fatal(err)
+	}
+	if err := ioutil.WriteFile("image1.png", buf, 0644); err != nil {
+		log.Fatal(err)
 	}
 
-	var buf []byte
-	for index, CaptureScreenshot := range CaptureScreenshotList {
-		log.Println("start index:", index)
-		if err := chromedp.Run(ctx, fullScreenshot(CaptureScreenshot["url"], 90, &buf)); err != nil {
-			log.Fatal(err)
-		}
-		if err := ioutil.WriteFile(CaptureScreenshot["image"], buf, 0644); err != nil {
-			log.Fatal(err)
-		}
-		log.Println("done index:", index)
+	buf = nil
+	if err := chromedp.Run(ctx, fullScreenshot(img2, 90, &buf)); err != nil {
+		log.Fatal(err)
+	}
+	if err := ioutil.WriteFile("image2.png", buf, 0644); err != nil {
+		log.Fatal(err)
 	}
 }
 
@@ -120,4 +126,18 @@ func fullScreenshot(urlstr string, quality int64, res *[]byte) chromedp.Tasks {
 			return nil
 		}),
 	}
+}
+
+func openImage(path string) (image.Image, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to open")
+	}
+	defer f.Close()
+
+	img, _, err := image.Decode(f)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to decode image")
+	}
+	return img, nil
 }
