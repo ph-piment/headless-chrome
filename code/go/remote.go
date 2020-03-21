@@ -10,6 +10,7 @@ import (
 	"math"
 	"os"
 	"image"
+	"path/filepath"
 
 	"github.com/pkg/errors"
 
@@ -28,18 +29,17 @@ func main() {
 	}
 	img1 := args[0]
 	img2 := args[1]
-	log.Println("img1:", img1)
-	log.Println("img2:", img2)
 
 	ctx, allocCancel, ctxtCancel := getContext()
 	defer allocCancel()
 	defer ctxtCancel()
 
+	compareDir := filepath.Dir("/go/src/work/outputs/images/compare/")
 	var buf []byte
 	if err := chromedp.Run(ctx, fullScreenshot(img1, 90, &buf)); err != nil {
 		log.Fatal(err)
 	}
-	if err := ioutil.WriteFile("./outputs/images/compare/source/image1.png", buf, 0644); err != nil {
+	if err := ioutil.WriteFile(compareDir + "/source/image1.png", buf, 0644); err != nil {
 		log.Fatal(err)
 	}
 
@@ -47,9 +47,11 @@ func main() {
 	if err := chromedp.Run(ctx, fullScreenshot(img2, 90, &buf)); err != nil {
 		log.Fatal(err)
 	}
-	if err := ioutil.WriteFile("./outputs/images/compare/target/image2.png", buf, 0644); err != nil {
+	if err := ioutil.WriteFile(compareDir + "/target/image2.png", buf, 0644); err != nil {
 		log.Fatal(err)
 	}
+
+	// compare
 }
 
 // TODO: move ...
