@@ -8,6 +8,7 @@ services:
   headless-browser:
     container_name: headless-browser
     build: ./headless-browser
+    shm_size: 512m # increased to show yahoo.com
     networks:
       - backend
 
