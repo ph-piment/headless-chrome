@@ -103,8 +103,6 @@ func fullScreenshot(urlstr string, quality int64, res *[]byte) chromedp.Tasks {
 			if err != nil {
 				return err
 			}
-			log.Println(contentSize)
-			log.Println("GetLayoutMetrics done")
 
 			width, height := int64(math.Ceil(contentSize.Width)), int64(math.Ceil(contentSize.Height))
 
@@ -118,7 +116,6 @@ func fullScreenshot(urlstr string, quality int64, res *[]byte) chromedp.Tasks {
 			if err != nil {
 				return err
 			}
-			log.Println("SetDeviceMetricsOverride done")
 
 			// capture screenshot
 			*res, err = page.CaptureScreenshot().
