@@ -35,25 +35,28 @@ func main() {
 	log.Println(body[0:100])
 
 	// capture screenshot of an element
-	var buf []byte
-	log.Println("buf start")
-	if err := chromedp.Run(ctx, fullScreenshot(`https://www.google.com/`, 10, &buf)); err != nil {
-		log.Fatal(err)
+	CaptureScreenshotList := []map[string]string{
+		{
+			"url": "https://www.google.com/",
+			"image": "google.png",
+		},
+		{
+			"url": "https://www.yahoo.com/",
+			"image": "yahoo.png",
+		},
 	}
-	if err := ioutil.WriteFile("google.png", buf, 0644); err != nil {
-		log.Fatal(err)
-	}
-	log.Println("buf done")
 
-	var buf2 []byte
-	log.Println("buf2 start")
-	if err := chromedp.Run(ctx, fullScreenshot(`http://abehiroshi.la.coocan.jp/`, 10, &buf2)); err != nil {
-		log.Fatal(err)
+	var buf []byte
+	for index, CaptureScreenshot := range CaptureScreenshotList {
+		log.Println("start index:", index)
+		if err := chromedp.Run(ctx, fullScreenshot(CaptureScreenshot["url"], 90, &buf)); err != nil {
+			log.Fatal(err)
+		}
+		if err := ioutil.WriteFile(CaptureScreenshot["image"], buf, 0644); err != nil {
+			log.Fatal(err)
+		}
+		log.Println("done index:", index)
 	}
-	if err := ioutil.WriteFile("abe.png", buf2, 0644); err != nil {
-		log.Fatal(err)
-	}
-	log.Println("buf2 done")
 }
 
 // TODO: move ...
@@ -94,7 +97,6 @@ func getDevToolWsURL() string {
 func fullScreenshot(urlstr string, quality int64, res *[]byte) chromedp.Tasks {
 	return chromedp.Tasks{
 		chromedp.Navigate(urlstr),
-//		chromedp.WaitVisible(`#Footer`),
 		chromedp.ActionFunc(func(ctx context.Context) error {
 			// get layout metrics
 			_, _, contentSize, err := page.GetLayoutMetrics().Do(ctx)
