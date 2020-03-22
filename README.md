@@ -28,11 +28,13 @@ The processing order is as follows.
 1. Compare images
 
 ### Usage
+```sh
 git clone https://github.com/ph-piment/headless-chrome.git
 cd docker
 docker-compose up -d --build
 docker exec -it workspace /bin/bash
 go run compare.go https://www.google.com https://www.google.com
+```
 
 ### Outputs
 * Web image of the first argument.(/go/src/work/outputs/images/compare/source/image.png)
