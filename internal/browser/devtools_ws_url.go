@@ -17,8 +17,6 @@ import (
 	"path/filepath"
 	"regexp"
 
-	"github.com/pkg/errors"
-
 	"github.com/chromedp/cdproto/emulation"
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
