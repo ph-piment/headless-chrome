@@ -5,14 +5,14 @@ package main
 import (
 	"context"
 	"flag"
+	"image"
+	"image/color"
+	"image/png"
 	"io"
 	"io/ioutil"
 	"log"
 	"math"
 	"os"
-	"image"
-	"image/color"
-	"image/png"
 	"path/filepath"
 
 	"github.com/pkg/errors"
@@ -28,82 +28,25 @@ import (
 
 type colorValue color.RGBA
 
+var compareDir = filepath.Dir("/go/src/work/outputs/images/compare/")
+
 func main() {
 	flag.Parse()
 	args := flag.Args()
 	if len(args) != 2 {
 		log.Fatal("Usage of pixelmatch [flags] image1 image2 :")
 	}
-	img1 := args[0]
-	img2 := args[1]
+	sourceURL := args[0]
+	targetURL := args[1]
 
 	ctx, allocCancel, ctxtCancel := getContext()
 	defer allocCancel()
 	defer ctxtCancel()
 
-	compareDir := filepath.Dir("/go/src/work/outputs/images/compare/")
-	var buf []byte
-	if err := chromedp.Run(ctx, fullScreenshot(img1, 90, &buf)); err != nil {
-		log.Fatal(err)
-	}
-	sourceImagePath := compareDir + "/source/image.png"
-	if err := ioutil.WriteFile(sourceImagePath, buf, 0644); err != nil {
-		log.Fatal(err)
-	}
-	img1file, err := openImage(sourceImagePath)
-	if err != nil {
-		log.Fatal(err)
-	}
+	sourceImage := getImageByURL(ctx, sourceURL, "/source/image.png")
+	targetImage := getImageByURL(ctx, targetURL, "/target/image.png")
 
-	buf = nil
-	if err := chromedp.Run(ctx, fullScreenshot(img2, 90, &buf)); err != nil {
-		log.Fatal(err)
-	}
-	targetImagePath := compareDir + "/target/image.png"
-	if err := ioutil.WriteFile(targetImagePath, buf, 0644); err != nil {
-		log.Fatal(err)
-	}
-	img2file, err := openImage(targetImagePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// compare
-	threshold := flag.Float64("threshold", 0.1, "threshold")
-	aa := flag.Bool("aa", false, "ignore anti alias pixel")
-	alpha := flag.Float64("alpha", 0.1, "alpha")
-	antiAliased := colorValue(color.RGBA{R: 255, G: 255})
-	diffColor := colorValue(color.RGBA{R: 255})
-	var out image.Image
-	opts := []pixelmatch.MatchOption{
-		pixelmatch.Threshold(*threshold),
-		pixelmatch.Alpha(*alpha),
-		pixelmatch.AntiAliasedColor(color.RGBA(antiAliased)),
-		pixelmatch.DiffColor(color.RGBA(diffColor)),
-		pixelmatch.WriteTo(&out),
-	}
-	if *aa {
-		opts = append(opts, pixelmatch.IncludeAntiAlias)
-	}
-
-	_, err = pixelmatch.MatchPixel(img1file, img2file, opts...)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var w io.Writer
-	f, err := os.Create(compareDir + "/result/image.png")
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer f.Close()
-	w = f
-
-	var encErr error
-	encErr = png.Encode(w, out)
-	if encErr != nil {
-		log.Fatal(err)
-	}
+	diffImage(sourceImage, targetImage, "/result/image.png")
 }
 
 // TODO: move ...
@@ -194,4 +137,60 @@ func openImage(path string) (image.Image, error) {
 		return nil, errors.Wrap(err, "failed to decode image")
 	}
 	return img, nil
+}
+
+func getImageByURL(ctx context.Context, url string, imagePath string) image.Image {
+	var buf []byte
+	if err := chromedp.Run(ctx, fullScreenshot(url, 90, &buf)); err != nil {
+		log.Fatal(err)
+	}
+	sourceImagePath := compareDir + imagePath
+	if err := ioutil.WriteFile(sourceImagePath, buf, 0644); err != nil {
+		log.Fatal(err)
+	}
+	imgfile, err := openImage(sourceImagePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return imgfile
+}
+
+func diffImage(sourceImage image.Image, targetImage image.Image, imagePath string) {
+	// compare
+	threshold := flag.Float64("threshold", 0.1, "threshold")
+	aa := flag.Bool("aa", false, "ignore anti alias pixel")
+	alpha := flag.Float64("alpha", 0.1, "alpha")
+	antiAliased := colorValue(color.RGBA{R: 255, G: 255})
+	diffColor := colorValue(color.RGBA{R: 255})
+	var out image.Image
+	opts := []pixelmatch.MatchOption{
+		pixelmatch.Threshold(*threshold),
+		pixelmatch.Alpha(*alpha),
+		pixelmatch.AntiAliasedColor(color.RGBA(antiAliased)),
+		pixelmatch.DiffColor(color.RGBA(diffColor)),
+		pixelmatch.WriteTo(&out),
+	}
+	if *aa {
+		opts = append(opts, pixelmatch.IncludeAntiAlias)
+	}
+
+	_, err := pixelmatch.MatchPixel(sourceImage, targetImage, opts...)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var w io.Writer
+	f, err := os.Create(compareDir + "/result/image.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer f.Close()
+	w = f
+
+	var encErr error
+	encErr = png.Encode(w, out)
+	if encErr != nil {
+		log.Fatal(err)
+	}
 }
