@@ -35,7 +35,7 @@ func openImage(path string) (image.Image, error) {
 	return img, nil
 }
 
-func getImageByURL(ctx context.Context, url string, imagePath string) image.Image {
+func GetImageByURL(ctx context.Context, url string, imagePath string) image.Image {
 	var buf []byte
 	if err := chromedp.Run(ctx, fullScreenshot(url, 90, &buf)); err != nil {
 		log.Fatal(err)
@@ -52,7 +52,7 @@ func getImageByURL(ctx context.Context, url string, imagePath string) image.Imag
 	return imgfile
 }
 
-func diffImage(sourceImage image.Image, targetImage image.Image, imagePath string) {
+func DiffImage(sourceImage image.Image, targetImage image.Image, imagePath string) {
 	// compare
 	threshold := flag.Float64("threshold", 0.1, "threshold")
 	aa := flag.Bool("aa", false, "ignore anti alias pixel")
