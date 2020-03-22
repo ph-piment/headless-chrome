@@ -3,7 +3,6 @@ package browser
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"flag"
 	"image"
 	"image/color"
@@ -16,6 +15,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"regexp"
+
+	"github.com/pkg/errors"
 
 	"github.com/chromedp/cdproto/emulation"
 	"github.com/chromedp/cdproto/page"
