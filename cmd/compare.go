@@ -5,14 +5,14 @@ package main
 import (
 	"context"
 	"flag"
+	"image"
+	"image/color"
+	"image/png"
 	"io"
 	"io/ioutil"
 	"log"
 	"math"
 	"os"
-	"image"
-	"image/color"
-	"image/png"
 	"path/filepath"
 
 	"github.com/pkg/errors"
@@ -41,32 +41,9 @@ func main() {
 	defer allocCancel()
 	defer ctxtCancel()
 
+	img1file := getImageByURL(ctx, img1, "/source/image.png")
+	img2file := getImageByURL(ctx, img2, "/target/image.png")
 	compareDir := filepath.Dir("/go/src/work/outputs/images/compare/")
-	var buf []byte
-	if err := chromedp.Run(ctx, fullScreenshot(img1, 90, &buf)); err != nil {
-		log.Fatal(err)
-	}
-	sourceImagePath := compareDir + "/source/image.png"
-	if err := ioutil.WriteFile(sourceImagePath, buf, 0644); err != nil {
-		log.Fatal(err)
-	}
-	img1file, err := openImage(sourceImagePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	buf = nil
-	if err := chromedp.Run(ctx, fullScreenshot(img2, 90, &buf)); err != nil {
-		log.Fatal(err)
-	}
-	targetImagePath := compareDir + "/target/image.png"
-	if err := ioutil.WriteFile(targetImagePath, buf, 0644); err != nil {
-		log.Fatal(err)
-	}
-	img2file, err := openImage(targetImagePath)
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	// compare
 	threshold := flag.Float64("threshold", 0.1, "threshold")
@@ -86,7 +63,7 @@ func main() {
 		opts = append(opts, pixelmatch.IncludeAntiAlias)
 	}
 
-	_, err = pixelmatch.MatchPixel(img1file, img2file, opts...)
+	_, err := pixelmatch.MatchPixel(img1file, img2file, opts...)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -194,4 +171,22 @@ func openImage(path string) (image.Image, error) {
 		return nil, errors.Wrap(err, "failed to decode image")
 	}
 	return img, nil
+}
+
+func getImageByURL(ctx context.Context, url string, imagePath string) image.Image {
+	compareDir := filepath.Dir("/go/src/work/outputs/images/compare/")
+	var buf []byte
+	if err := chromedp.Run(ctx, fullScreenshot(url, 90, &buf)); err != nil {
+		log.Fatal(err)
+	}
+	sourceImagePath := compareDir + imagePath
+	if err := ioutil.WriteFile(sourceImagePath, buf, 0644); err != nil {
+		log.Fatal(err)
+	}
+	imgfile, err := openImage(sourceImagePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return imgfile
 }
