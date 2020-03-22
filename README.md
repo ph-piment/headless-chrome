@@ -30,7 +30,7 @@ git clone https://github.com/ph-piment/headless-chrome.git
 cd docker
 docker-compose up -d --build
 docker exec -it workspace /bin/bash
-go run compare.go https://www.google.com https://www.google.com
+go run ./cmd/compare.go https://www.google.com https://www.google.com
 ```
 
 ### Outputs
@@ -46,6 +46,7 @@ go run compare.go https://www.google.com https://www.google.com
 * Add circle ci
 
 ### Resources
+* https://github.com/golang-standards/project-layout
 * https://github.com/chromedp/chromedp
 * https://github.com/chromedp/docker-headless-shell
 * https://github.com/orisano/pixelmatch
