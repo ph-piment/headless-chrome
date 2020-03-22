@@ -6,19 +6,16 @@ Currently, the following functions are provided.
 
 * compare.go
 
-Pass the two URLs to compare and compare the images on the web page.
-
-(Want to use in regression test)
+  Pass the two URLs to compare and compare the images on the web page.
+  (Want to use in regression test)
 
 * register.go -> not started yet...
 
-Register web page information in the database.
-
-(Want to use in scraping)
+  Register web page information in the database.
+  (Want to use in scraping)
 
 ## About compare.go
 Pass the two URLs to compare and compare the images on the web page.
-
 (Want to use in regression test)
 
 The processing order is as follows.
@@ -46,6 +43,7 @@ go run compare.go https://www.google.com https://www.google.com
 * Add test code
 * Parallel processing
 * Exception handling organization
+* Add circle ci
 
 ### Resources
 * https://github.com/chromedp/chromedp
