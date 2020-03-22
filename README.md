@@ -6,19 +6,16 @@ Currently, the following functions are provided.
 
 * compare.go
 
-Pass the two URLs to compare and compare the images on the web page.
-
-(Want to use in regression test)
+  Pass the two URLs to compare and compare the images on the web page.
+  (Want to use in regression test)
 
 * register.go -> not started yet...
 
-Register web page information in the database.
-
-(Want to use in scraping)
+  Register web page information in the database.
+  (Want to use in scraping)
 
 ## About compare.go
 Pass the two URLs to compare and compare the images on the web page.
-
 (Want to use in regression test)
 
 The processing order is as follows.
@@ -33,7 +30,7 @@ git clone https://github.com/ph-piment/headless-chrome.git
 cd docker
 docker-compose up -d --build
 docker exec -it workspace /bin/bash
-go run compare.go https://www.google.com https://www.google.com
+go run ./cmd/compare.go https://www.google.com https://www.google.com
 ```
 
 ### Outputs
@@ -46,8 +43,10 @@ go run compare.go https://www.google.com https://www.google.com
 * Add test code
 * Parallel processing
 * Exception handling organization
+* Add circle ci
 
 ### Resources
+* https://github.com/golang-standards/project-layout
 * https://github.com/chromedp/chromedp
 * https://github.com/chromedp/docker-headless-shell
 * https://github.com/orisano/pixelmatch

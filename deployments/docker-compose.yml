@@ -7,17 +7,17 @@ networks:
 services:
   headless-browser:
     container_name: headless-browser
-    build: ./headless-browser
+    build: ../build/docker/headless-browser
     shm_size: 512m # increased to show yahoo.com
     networks:
       - backend
 
   workspace:
     container_name: workspace
-    build: ./go
+    build: ../build/docker/go
     tty: true
     volumes:
-      - ../code/go:/go/src/work
+      - ../:/go/src/work
     depends_on:
       - headless-browser
     networks:
