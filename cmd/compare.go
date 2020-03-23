@@ -9,6 +9,8 @@ import (
 	"work/internal/browser"
 )
 
+const compareOutputDir = "/go/src/work/outputs/images/compare/"
+
 func main() {
 	flag.Parse()
 	args := flag.Args()
@@ -22,8 +24,8 @@ func main() {
 	defer allocCancel()
 	defer ctxtCancel()
 
-	sourceImage := browser.GetImageByURL(ctx, sourceURL, "/source/image.png")
-	targetImage := browser.GetImageByURL(ctx, targetURL, "/target/image.png")
+	sourceImage := browser.GetImageByURL(ctx, sourceURL, compareOutputDir+"source/image.png")
+	targetImage := browser.GetImageByURL(ctx, targetURL, compareOutputDir+"target/image.png")
 
-	browser.DiffImage(sourceImage, targetImage, "/result/image.png")
+	browser.DiffImage(sourceImage, targetImage, compareOutputDir+"result/image.png")
 }

@@ -7,7 +7,6 @@ import (
 	"log"
 	"math"
 	"os"
-	"path/filepath"
 
 	"github.com/pkg/errors"
 
@@ -15,9 +14,6 @@ import (
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
 )
-
-// TODO: move to config
-var browserCompareDir = filepath.Dir("/go/src/work/outputs/images/compare/")
 
 func GetContext() (context.Context, context.CancelFunc, context.CancelFunc) {
 	devtoolsEndpoint, err := GetDevtoolsEndpoint()
@@ -89,14 +85,13 @@ func GetImageByURL(ctx context.Context, url string, imagePath string) image.Imag
 	if err := chromedp.Run(ctx, fullScreenshot(url, 90, &buf)); err != nil {
 		log.Fatal(err)
 	}
-	sourceImagePath := browserCompareDir + imagePath
-	if err := ioutil.WriteFile(sourceImagePath, buf, 0644); err != nil {
+	if err := ioutil.WriteFile(imagePath, buf, 0644); err != nil {
 		log.Fatal(err)
 	}
-	imgfile, err := openImage(sourceImagePath)
+	imagefile, err := openImage(imagePath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	return imgfile
+	return imagefile
 }
