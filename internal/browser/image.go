@@ -8,13 +8,9 @@ import (
 	"io"
 	"log"
 	"os"
-	"path/filepath"
 
 	"github.com/orisano/pixelmatch"
 )
-
-// TODO: move to config
-var imageCompareDir = filepath.Dir("/go/src/work/outputs/images/compare/")
 
 type colorValue color.RGBA
 
@@ -43,7 +39,7 @@ func DiffImage(sourceImage image.Image, targetImage image.Image, imagePath strin
 	}
 
 	var w io.Writer
-	f, err := os.Create(imageCompareDir + "/result/image.png")
+	f, err := os.Create(imagePath)
 	if err != nil {
 		log.Fatal(err)
 	}
