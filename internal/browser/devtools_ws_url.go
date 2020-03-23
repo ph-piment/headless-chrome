@@ -1,16 +1,11 @@
 package browser
 
 import (
-	"context"
 	"encoding/json"
-	"flag"
-	"log"
 	"os/exec"
 	"regexp"
 
 	"github.com/pkg/errors"
-
-	"github.com/chromedp/chromedp"
 )
 
 const (
@@ -20,7 +15,7 @@ const (
 	devtoolsEndpointPath      = "/devtools/browser/"
 )
 
-func getDevtoolsEndpoint() (string, error) {
+func GetDevtoolsEndpoint() (string, error) {
 	devtoolsWs, err := getDevtoolsWs()
 
 	if err != nil {
@@ -66,34 +61,4 @@ func getDevtoolsWs() ([]byte, error) {
 	}
 
 	return out, nil
-}
-
-// TODO: move ...
-func GetContext() (context.Context, context.CancelFunc, context.CancelFunc) {
-	devToolWsURL := getDevToolWsURL()
-
-	// create allocator context for use with creating a browser context later
-	allocatorContext, allocCancel := chromedp.NewRemoteAllocator(context.Background(), devToolWsURL)
-
-	// create context
-	ctxt, ctxtCancel := chromedp.NewContext(allocatorContext)
-
-	return ctxt, allocCancel, ctxtCancel
-}
-
-// TODO: move browser package.
-func getDevToolWsURL() string {
-	flag.Parse()
-
-	devtoolsEndpoint, err := getDevtoolsEndpoint()
-	if err != nil {
-		log.Fatal("must get devtools endpoint")
-	}
-
-	flagDevToolWsURL := flag.String("devtools-ws-url", devtoolsEndpoint, "DevTools WebSsocket URL")
-	if *flagDevToolWsURL == "" {
-		log.Fatal("must specify -devtools-ws-url")
-	}
-
-	return *flagDevToolWsURL
 }
