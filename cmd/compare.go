@@ -1,12 +1,12 @@
 // Command remote is a chromedp example demonstrating how to connect to an
 // existing Chrome DevTools instance using a remote WebSocket URL.
-package headless-chrome
+package main
 
 import (
 	"flag"
 	"log"
 
-	"github.com/ph-piment/headless-chrome/internal/browser"
+	"work/internal/browser"
 )
 
 func main() {
