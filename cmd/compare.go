@@ -33,8 +33,8 @@ func main() {
 	resultImagePath := compareOutputDir + "result/image.png"
 	image.WriteImageByByte(sourceScreenshotByte, sourceImagePath)
 	image.WriteImageByByte(targetScreenshotByte, targetImagePath)
-	sourceImage, _ := image.OpenImage(sourceImagePath)
-	targetImage, _ := image.OpenImage(targetImagePath)
+	sourceImage, _ := image.ReadImageByPath(sourceImagePath)
+	targetImage, _ := image.ReadImageByPath(targetImagePath)
 
-	image.DiffImage(sourceImage, targetImage, resultImagePath)
+	image.CompareImage(sourceImage, targetImage, resultImagePath)
 }

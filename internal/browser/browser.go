@@ -28,7 +28,7 @@ func GetContext() (context.Context, context.CancelFunc, context.CancelFunc) {
 	return ctx, allocCxl, ctxCxl
 }
 
-func fullScreenshot(url string, quality int64, res *[]byte) chromedp.Tasks {
+func getFullScreenshot(url string, quality int64, res *[]byte) chromedp.Tasks {
 	return chromedp.Tasks{
 		chromedp.Navigate(url),
 		chromedp.ActionFunc(func(ctx context.Context) error {
@@ -69,7 +69,7 @@ func fullScreenshot(url string, quality int64, res *[]byte) chromedp.Tasks {
 // GetFullScreenshotByteByURL get image by URL.
 func GetFullScreenshotByteByURL(ctx context.Context, url string) ([]byte, error) {
 	var buf []byte
-	if err := chromedp.Run(ctx, fullScreenshot(url, ScreenshotQuality, &buf)); err != nil {
+	if err := chromedp.Run(ctx, getFullScreenshot(url, ScreenshotQuality, &buf)); err != nil {
 		return nil, err
 	}
 	return buf, nil

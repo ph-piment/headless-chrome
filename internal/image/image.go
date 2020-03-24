@@ -17,8 +17,16 @@ import (
 
 type colorValue color.RGBA
 
-// OpenImage open by file path
-func OpenImage(path string) (image.Image, error) {
+// WriteImageByByte write image by bytes
+func WriteImageByByte(buf []byte, imagePath string) error {
+	if err := ioutil.WriteFile(imagePath, buf, 0644); err != nil {
+		return err
+	}
+	return nil
+}
+
+// ReadImageByPath open by file path
+func ReadImageByPath(path string) (image.Image, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to open")
@@ -32,16 +40,8 @@ func OpenImage(path string) (image.Image, error) {
 	return img, nil
 }
 
-// WriteImageByByte write image by bytes
-func WriteImageByByte(buf []byte, imagePath string) error {
-	if err := ioutil.WriteFile(imagePath, buf, 0644); err != nil {
-		return err
-	}
-	return nil
-}
-
-// DiffImage compare sourceImage and targetImage.
-func DiffImage(sourceImage image.Image, targetImage image.Image, imagePath string) {
+// CompareImage compare sourceImage and targetImage.
+func CompareImage(sourceImage image.Image, targetImage image.Image, imagePath string) {
 	threshold := flag.Float64("threshold", 0.1, "threshold")
 	aa := flag.Bool("aa", false, "ignore anti alias pixel")
 	alpha := flag.Float64("alpha", 0.1, "alpha")
