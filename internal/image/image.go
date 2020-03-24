@@ -7,7 +7,6 @@ import (
 	"image/png"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 
 	"github.com/orisano/pixelmatch"
@@ -41,7 +40,7 @@ func ReadImageByPath(path string) (image.Image, error) {
 }
 
 // CompareImage compare sourceImage and targetImage.
-func CompareImage(sourceImage image.Image, targetImage image.Image, imagePath string) {
+func CompareImage(sourceImage image.Image, targetImage image.Image, imagePath string) error {
 	threshold := flag.Float64("threshold", 0.1, "threshold")
 	aa := flag.Bool("aa", false, "ignore anti alias pixel")
 	alpha := flag.Float64("alpha", 0.1, "alpha")
@@ -61,13 +60,13 @@ func CompareImage(sourceImage image.Image, targetImage image.Image, imagePath st
 
 	_, err := pixelmatch.MatchPixel(sourceImage, targetImage, opts...)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	var w io.Writer
 	f, err := os.Create(imagePath)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer f.Close()
 	w = f
@@ -75,6 +74,7 @@ func CompareImage(sourceImage image.Image, targetImage image.Image, imagePath st
 	var encErr error
 	encErr = png.Encode(w, out)
 	if encErr != nil {
-		log.Fatal(err)
+		return err
 	}
+	return nil
 }
