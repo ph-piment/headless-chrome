@@ -30,6 +30,19 @@ func GetDevtoolsEndpoint() (string, error) {
 	return wsDebuggerURL, nil
 }
 
+func getDevtoolsWsByte() ([]byte, error) {
+	// TODO: modify Http.get.(Http.get could not respond)
+	devtoolsWsDomainJSONVersionPath :=
+		devtoolsWsDomain + devtoolsWsJSONVersionPath
+	cmd := exec.Command("curl", "-H", "host:", devtoolsWsDomainJSONVersionPath)
+	out, err := cmd.Output()
+	if err != nil {
+		return []byte(""), err
+	}
+
+	return out, nil
+}
+
 func getWsDebuggerURL(devtoolsWsByte []byte) (string, error) {
 	var devtoolsWsJSON map[string]interface{}
 
@@ -48,18 +61,4 @@ func getWsDebuggerURL(devtoolsWsByte []byte) (string, error) {
 	wsDebuggerURL :=
 		devtoolsWsScheme + devtoolsWsDomain + devtoolsEndpointPath + devtoolsWsHash
 	return wsDebuggerURL, nil
-}
-
-func getDevtoolsWsByte() ([]byte, error) {
-	// TODO: modify Http.get.(Http.get could not respond)
-	devtoolsWsDomainJSONVersionPath :=
-		devtoolsWsDomain + devtoolsWsJSONVersionPath
-	cmd := exec.Command("curl", "-H", "host:", devtoolsWsDomainJSONVersionPath)
-	out, err := cmd.Output()
-
-	if err != nil {
-		return []byte(""), err
-	}
-
-	return out, nil
 }
