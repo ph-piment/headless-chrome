@@ -71,9 +71,7 @@ func CompareImage(sourceImage image.Image, targetImage image.Image, imagePath st
 	defer f.Close()
 	w = f
 
-	var encErr error
-	encErr = png.Encode(w, out)
-	if encErr != nil {
+	if err := png.Encode(w, out); err != nil {
 		return err
 	}
 	return nil
