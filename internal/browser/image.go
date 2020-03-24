@@ -17,6 +17,7 @@ import (
 
 type colorValue color.RGBA
 
+// OpenImage open by file path
 func OpenImage(path string) (image.Image, error) {
 	f, err := os.Open(path)
 	if err != nil {
@@ -31,6 +32,7 @@ func OpenImage(path string) (image.Image, error) {
 	return img, nil
 }
 
+// WriteImageByByte write image by bytes
 func WriteImageByByte(buf []byte, imagePath string) error {
 	if error := ioutil.WriteFile(imagePath, buf, 0644); error != nil {
 		return error
@@ -38,8 +40,8 @@ func WriteImageByByte(buf []byte, imagePath string) error {
 	return nil
 }
 
+// DiffImage compare sourceImage and targetImage.
 func DiffImage(sourceImage image.Image, targetImage image.Image, imagePath string) {
-	// compare
 	threshold := flag.Float64("threshold", 0.1, "threshold")
 	aa := flag.Bool("aa", false, "ignore anti alias pixel")
 	alpha := flag.Float64("alpha", 0.1, "alpha")
