@@ -2,13 +2,8 @@ package browser
 
 import (
 	"context"
-	"image"
-	"io/ioutil"
 	"log"
 	"math"
-	"os"
-
-	"github.com/pkg/errors"
 
 	"github.com/chromedp/cdproto/emulation"
 	"github.com/chromedp/cdproto/page"
@@ -66,32 +61,10 @@ func fullScreenshot(urlstr string, quality int64, res *[]byte) chromedp.Tasks {
 	}
 }
 
-func openImage(path string) (image.Image, error) {
-	f, error := os.Open(path)
-	if error != nil {
-		return nil, errors.Wrap(error, "failed to open")
-	}
-	defer f.Close()
-
-	img, _, error := image.Decode(f)
-	if error != nil {
-		return nil, errors.Wrap(error, "failed to decode image")
-	}
-	return img, nil
-}
-
-func GetImageByURL(ctx context.Context, url string, imagePath string) image.Image {
+func GetImageByURL(ctx context.Context, url string) ([]byte, error) {
 	var buf []byte
 	if error := chromedp.Run(ctx, fullScreenshot(url, 90, &buf)); error != nil {
-		log.Fatal(error)
+		return nil, error
 	}
-	if error := ioutil.WriteFile(imagePath, buf, 0644); error != nil {
-		log.Fatal(error)
-	}
-	imagefile, error := openImage(imagePath)
-	if error != nil {
-		log.Fatal(error)
-	}
-
-	return imagefile
+	return buf, nil
 }

@@ -24,8 +24,12 @@ func main() {
 	defer allocCancel()
 	defer ctxtCancel()
 
-	sourceImage := browser.GetImageByURL(ctx, sourceURL, compareOutputDir+"source/image.png")
-	targetImage := browser.GetImageByURL(ctx, targetURL, compareOutputDir+"target/image.png")
+	sourceImageByte, _ := browser.GetImageByURL(ctx, sourceURL)
+	targetImageByte, _ := browser.GetImageByURL(ctx, targetURL)
+	browser.WriteImageByByte(sourceImageByte, compareOutputDir+"source/image.png")
+	browser.WriteImageByByte(targetImageByte, compareOutputDir+"target/image.png")
+	sourceImage, _ := browser.OpenImage(compareOutputDir + "source/image.png")
+	targetImage, _ := browser.OpenImage(compareOutputDir + "target/image.png")
 
 	browser.DiffImage(sourceImage, targetImage, compareOutputDir+"result/image.png")
 }
