@@ -10,41 +10,46 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
+// ScreenshotQuality is screenshot quality
+const ScreenshotQuality = 50
+
 // GetContext get context by NewRemoteAllocator.
 func GetContext() (context.Context, context.CancelFunc, context.CancelFunc) {
-	devtoolsEndpoint, error := GetDevtoolsEndpoint()
-	if error != nil {
+	devtoolsEndpoint, err := GetDevtoolsEndpoint()
+	if err != nil {
 		log.Fatal("must get devtools endpoint")
 	}
 
-	allocatorContext, allocCancel := chromedp.NewRemoteAllocator(context.Background(), devtoolsEndpoint)
+	allocCtx, allocCxl :=
+		chromedp.NewRemoteAllocator(context.Background(), devtoolsEndpoint)
 
-	ctxt, ctxtCancel := chromedp.NewContext(allocatorContext)
+	ctx, ctxCxl := chromedp.NewContext(allocCtx)
 
-	return ctxt, allocCancel, ctxtCancel
+	return ctx, allocCxl, ctxCxl
 }
 
-func fullScreenshot(urlstr string, quality int64, res *[]byte) chromedp.Tasks {
+func getFullScreenshot(url string, quality int64, res *[]byte) chromedp.Tasks {
 	return chromedp.Tasks{
-		chromedp.Navigate(urlstr),
+		chromedp.Navigate(url),
 		chromedp.ActionFunc(func(ctx context.Context) error {
-			_, _, contentSize, error := page.GetLayoutMetrics().Do(ctx)
-			if error != nil {
-				return error
+			_, _, contentSize, err := page.GetLayoutMetrics().Do(ctx)
+			if err != nil {
+				return err
 			}
 
-			width, height := int64(math.Ceil(contentSize.Width)), int64(math.Ceil(contentSize.Height))
+			width, height :=
+				int64(math.Ceil(contentSize.Width)), int64(math.Ceil(contentSize.Height))
 
-			error = emulation.SetDeviceMetricsOverride(width, height, 1, false).
+			err = emulation.SetDeviceMetricsOverride(width, height, 1, false).
 				WithScreenOrientation(&emulation.ScreenOrientation{
 					Type:  emulation.OrientationTypePortraitPrimary,
 					Angle: 0,
 				}).Do(ctx)
-			if error != nil {
-				return error
+			if err != nil {
+				return err
 			}
 
-			*res, error = page.CaptureScreenshot().
+			*res, err = page.CaptureScreenshot().
 				WithQuality(quality).
 				WithClip(&page.Viewport{
 					X:      contentSize.X,
@@ -53,19 +58,19 @@ func fullScreenshot(urlstr string, quality int64, res *[]byte) chromedp.Tasks {
 					Height: contentSize.Height,
 					Scale:  1,
 				}).Do(ctx)
-			if error != nil {
-				return error
+			if err != nil {
+				return err
 			}
 			return nil
 		}),
 	}
 }
 
-// GetImageByURL get image by URL.
-func GetImageByURL(ctx context.Context, url string) ([]byte, error) {
+// GetFullScreenshotByteByURL get image by URL.
+func GetFullScreenshotByteByURL(ctx context.Context, url string) ([]byte, error) {
 	var buf []byte
-	if error := chromedp.Run(ctx, fullScreenshot(url, 90, &buf)); error != nil {
-		return nil, error
+	if err := chromedp.Run(ctx, getFullScreenshot(url, ScreenshotQuality, &buf)); err != nil {
+		return nil, err
 	}
 	return buf, nil
 }

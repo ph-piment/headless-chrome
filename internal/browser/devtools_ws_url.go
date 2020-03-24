@@ -15,28 +15,39 @@ const (
 	devtoolsEndpointPath      = "/devtools/browser/"
 )
 
-// GetDevtoolsEndpoint gets the string dev tools endpoint.
+// GetDevtoolsEndpoint get the string dev tools endpoint.
 func GetDevtoolsEndpoint() (string, error) {
-	devtoolsWs, error := getDevtoolsWs()
-
-	if error != nil {
-		return "", error
+	devtoolsWsByte, err := getDevtoolsWsByte()
+	if err != nil {
+		return "", err
 	}
 
-	wsDebuggerURL, error := getWsDebuggerURL(devtoolsWs)
-
-	if error != nil {
-		return "", error
+	wsDebuggerURL, err := getWsDebuggerURL(devtoolsWsByte)
+	if err != nil {
+		return "", err
 	}
 
 	return wsDebuggerURL, nil
 }
 
-func getWsDebuggerURL(devtoolsWs []byte) (string, error) {
+func getDevtoolsWsByte() ([]byte, error) {
+	// TODO: modify Http.get.(Http.get could not respond)
+	devtoolsWsDomainJSONVersionPath :=
+		devtoolsWsDomain + devtoolsWsJSONVersionPath
+	cmd := exec.Command("curl", "-H", "host:", devtoolsWsDomainJSONVersionPath)
+	out, err := cmd.Output()
+	if err != nil {
+		return []byte(""), err
+	}
+
+	return out, nil
+}
+
+func getWsDebuggerURL(devtoolsWsByte []byte) (string, error) {
 	var devtoolsWsJSON map[string]interface{}
 
-	if error := json.Unmarshal([]byte(devtoolsWs), &devtoolsWsJSON); error != nil {
-		return "", error
+	if err := json.Unmarshal(devtoolsWsByte, &devtoolsWsJSON); err != nil {
+		return "", err
 	}
 
 	webSocketDebuggerURL, ok := devtoolsWsJSON["webSocketDebuggerUrl"]
@@ -47,19 +58,7 @@ func getWsDebuggerURL(devtoolsWs []byte) (string, error) {
 	rep := regexp.MustCompile(devtoolsWsScheme + ".*" + devtoolsEndpointPath)
 	devtoolsWsHash := rep.ReplaceAllString(webSocketDebuggerURL.(string), "")
 
-	wsDebuggerURL := devtoolsWsScheme + devtoolsWsDomain + devtoolsEndpointPath + devtoolsWsHash
+	wsDebuggerURL :=
+		devtoolsWsScheme + devtoolsWsDomain + devtoolsEndpointPath + devtoolsWsHash
 	return wsDebuggerURL, nil
-}
-
-func getDevtoolsWs() ([]byte, error) {
-	// TODO: modify Http.get.(Http.get could not respond)
-	devtoolsWsDomainJSONVersionPath := devtoolsWsDomain + devtoolsWsJSONVersionPath
-	cmd := exec.Command("curl", "-H", "host:", devtoolsWsDomainJSONVersionPath)
-	out, error := cmd.Output()
-
-	if error != nil {
-		return []byte(""), error
-	}
-
-	return out, nil
 }
