@@ -26,10 +26,14 @@ func main() {
 
 	sourceImageByte, _ := browser.GetImageByURL(ctx, sourceURL)
 	targetImageByte, _ := browser.GetImageByURL(ctx, targetURL)
-	browser.WriteImageByByte(sourceImageByte, compareOutputDir+"source/image.png")
-	browser.WriteImageByByte(targetImageByte, compareOutputDir+"target/image.png")
-	sourceImage, _ := browser.OpenImage(compareOutputDir + "source/image.png")
-	targetImage, _ := browser.OpenImage(compareOutputDir + "target/image.png")
 
-	browser.DiffImage(sourceImage, targetImage, compareOutputDir+"result/image.png")
+	sourceImagePath := compareOutputDir + "source/image.png"
+	targetImagePath := compareOutputDir + "target/image.png"
+	resultImagePath := compareOutputDir + "result/image.png"
+	browser.WriteImageByByte(sourceImageByte, sourceImagePath)
+	browser.WriteImageByByte(targetImageByte, targetImagePath)
+	sourceImage, _ := browser.OpenImage(sourceImagePath)
+	targetImage, _ := browser.OpenImage(targetImagePath)
+
+	browser.DiffImage(sourceImage, targetImage, resultImagePath)
 }
