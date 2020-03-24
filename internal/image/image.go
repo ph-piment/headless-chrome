@@ -1,4 +1,4 @@
-package browser
+package image
 
 import (
 	"flag"
@@ -6,16 +6,41 @@ import (
 	"image/color"
 	"image/png"
 	"io"
-	"log"
+	"io/ioutil"
 	"os"
 
 	"github.com/orisano/pixelmatch"
+
+	"github.com/pkg/errors"
 )
 
 type colorValue color.RGBA
 
-func DiffImage(sourceImage image.Image, targetImage image.Image, imagePath string) {
-	// compare
+// WriteImageByByte write image by bytes
+func WriteImageByByte(buf []byte, imagePath string) error {
+	if err := ioutil.WriteFile(imagePath, buf, 0644); err != nil {
+		return err
+	}
+	return nil
+}
+
+// ReadImageByPath open by file path
+func ReadImageByPath(path string) (image.Image, error) {
+	f, err := os.Open(path)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to open")
+	}
+	defer f.Close()
+
+	img, _, err := image.Decode(f)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to decode image")
+	}
+	return img, nil
+}
+
+// CompareImage compare sourceImage and targetImage.
+func CompareImage(sourceImage image.Image, targetImage image.Image, imagePath string) error {
 	threshold := flag.Float64("threshold", 0.1, "threshold")
 	aa := flag.Bool("aa", false, "ignore anti alias pixel")
 	alpha := flag.Float64("alpha", 0.1, "alpha")
@@ -35,20 +60,19 @@ func DiffImage(sourceImage image.Image, targetImage image.Image, imagePath strin
 
 	_, err := pixelmatch.MatchPixel(sourceImage, targetImage, opts...)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	var w io.Writer
 	f, err := os.Create(imagePath)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	defer f.Close()
 	w = f
 
-	var encErr error
-	encErr = png.Encode(w, out)
-	if encErr != nil {
-		log.Fatal(err)
+	if err := png.Encode(w, out); err != nil {
+		return err
 	}
+	return nil
 }

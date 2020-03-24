@@ -2,49 +2,49 @@ package browser
 
 import (
 	"context"
-	"image"
-	"io/ioutil"
 	"log"
 	"math"
-	"os"
-
-	"github.com/pkg/errors"
 
 	"github.com/chromedp/cdproto/emulation"
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
 )
 
+// ScreenshotQuality is screenshot quality
+const ScreenshotQuality = 50
+
+// GetContext get context by NewRemoteAllocator.
 func GetContext() (context.Context, context.CancelFunc, context.CancelFunc) {
 	devtoolsEndpoint, err := GetDevtoolsEndpoint()
 	if err != nil {
 		log.Fatal("must get devtools endpoint")
 	}
 
-	allocatorContext, allocCancel := chromedp.NewRemoteAllocator(context.Background(), devtoolsEndpoint)
+	allocCtx, allocCxl :=
+		chromedp.NewRemoteAllocator(context.Background(), devtoolsEndpoint)
 
-	ctxt, ctxtCancel := chromedp.NewContext(allocatorContext)
+	ctx, ctxCxl := chromedp.NewContext(allocCtx)
 
-	return ctxt, allocCancel, ctxtCancel
+	return ctx, allocCxl, ctxCxl
 }
 
-func fullScreenshot(urlstr string, quality int64, res *[]byte) chromedp.Tasks {
+func getFullScreenshot(url string, quality int64, res *[]byte) chromedp.Tasks {
 	return chromedp.Tasks{
-		chromedp.Navigate(urlstr),
+		chromedp.Navigate(url),
 		chromedp.ActionFunc(func(ctx context.Context) error {
 			_, _, contentSize, err := page.GetLayoutMetrics().Do(ctx)
 			if err != nil {
 				return err
 			}
 
-			width, height := int64(math.Ceil(contentSize.Width)), int64(math.Ceil(contentSize.Height))
+			width, height :=
+				int64(math.Ceil(contentSize.Width)), int64(math.Ceil(contentSize.Height))
 
 			err = emulation.SetDeviceMetricsOverride(width, height, 1, false).
 				WithScreenOrientation(&emulation.ScreenOrientation{
 					Type:  emulation.OrientationTypePortraitPrimary,
 					Angle: 0,
-				}).
-				Do(ctx)
+				}).Do(ctx)
 			if err != nil {
 				return err
 			}
@@ -66,32 +66,11 @@ func fullScreenshot(urlstr string, quality int64, res *[]byte) chromedp.Tasks {
 	}
 }
 
-func openImage(path string) (image.Image, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to open")
-	}
-	defer f.Close()
-
-	img, _, err := image.Decode(f)
-	if err != nil {
-		return nil, errors.Wrap(err, "failed to decode image")
-	}
-	return img, nil
-}
-
-func GetImageByURL(ctx context.Context, url string, imagePath string) image.Image {
+// GetFullScreenshotByteByURL get image by URL.
+func GetFullScreenshotByteByURL(ctx context.Context, url string) ([]byte, error) {
 	var buf []byte
-	if err := chromedp.Run(ctx, fullScreenshot(url, 90, &buf)); err != nil {
-		log.Fatal(err)
+	if err := chromedp.Run(ctx, getFullScreenshot(url, ScreenshotQuality, &buf)); err != nil {
+		return nil, err
 	}
-	if err := ioutil.WriteFile(imagePath, buf, 0644); err != nil {
-		log.Fatal(err)
-	}
-	imagefile, err := openImage(imagePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	return imagefile
+	return buf, nil
 }

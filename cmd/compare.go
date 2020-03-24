@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"work/internal/browser"
+	"work/internal/image"
 )
 
 const compareOutputDir = "/go/src/work/outputs/images/compare/"
@@ -20,12 +21,38 @@ func main() {
 	sourceURL := args[0]
 	targetURL := args[1]
 
-	ctx, allocCancel, ctxtCancel := browser.GetContext()
-	defer allocCancel()
-	defer ctxtCancel()
+	ctx, allocCxl, ctxCxl := browser.GetContext()
+	defer allocCxl()
+	defer ctxCxl()
 
-	sourceImage := browser.GetImageByURL(ctx, sourceURL, compareOutputDir+"source/image.png")
-	targetImage := browser.GetImageByURL(ctx, targetURL, compareOutputDir+"target/image.png")
+	srcScshoByte, err := browser.GetFullScreenshotByteByURL(ctx, sourceURL)
+	if err != nil {
+		log.Fatal(err)
+	}
+	tgtScshoByte, err := browser.GetFullScreenshotByteByURL(ctx, targetURL)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-	browser.DiffImage(sourceImage, targetImage, compareOutputDir+"result/image.png")
+	srcImagePath := compareOutputDir + "source/image.png"
+	tgtImagePath := compareOutputDir + "target/image.png"
+	if err := image.WriteImageByByte(srcScshoByte, srcImagePath); err != nil {
+		log.Fatal(err)
+	}
+	if err := image.WriteImageByByte(tgtScshoByte, tgtImagePath); err != nil {
+		log.Fatal(err)
+	}
+	srcImage, err := image.ReadImageByPath(srcImagePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	tgtImage, err := image.ReadImageByPath(tgtImagePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	resImagePath := compareOutputDir + "result/image.png"
+	if err := image.CompareImage(srcImage, tgtImage, resImagePath); err != nil {
+		log.Fatal(err)
+	}
 }
