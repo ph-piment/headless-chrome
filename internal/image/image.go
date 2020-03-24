@@ -34,8 +34,8 @@ func OpenImage(path string) (image.Image, error) {
 
 // WriteImageByByte write image by bytes
 func WriteImageByByte(buf []byte, imagePath string) error {
-	if error := ioutil.WriteFile(imagePath, buf, 0644); error != nil {
-		return error
+	if err := ioutil.WriteFile(imagePath, buf, 0644); err != nil {
+		return err
 	}
 	return nil
 }
