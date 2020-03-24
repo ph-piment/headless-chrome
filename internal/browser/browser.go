@@ -15,6 +15,7 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
+// GetContext get context by NewRemoteAllocator.
 func GetContext() (context.Context, context.CancelFunc, context.CancelFunc) {
 	devtoolsEndpoint, err := GetDevtoolsEndpoint()
 	if err != nil {
