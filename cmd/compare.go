@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"work/internal/browser"
+	"work/internal/image"
 )
 
 const compareOutputDir = "/go/src/work/outputs/images/compare/"
@@ -30,10 +31,10 @@ func main() {
 	sourceImagePath := compareOutputDir + "source/image.png"
 	targetImagePath := compareOutputDir + "target/image.png"
 	resultImagePath := compareOutputDir + "result/image.png"
-	browser.WriteImageByByte(sourceImageByte, sourceImagePath)
-	browser.WriteImageByByte(targetImageByte, targetImagePath)
-	sourceImage, _ := browser.OpenImage(sourceImagePath)
-	targetImage, _ := browser.OpenImage(targetImagePath)
+	image.WriteImageByByte(sourceImageByte, sourceImagePath)
+	image.WriteImageByByte(targetImageByte, targetImagePath)
+	sourceImage, _ := image.OpenImage(sourceImagePath)
+	targetImage, _ := image.OpenImage(targetImagePath)
 
-	browser.DiffImage(sourceImage, targetImage, resultImagePath)
+	image.DiffImage(sourceImage, targetImage, resultImagePath)
 }
