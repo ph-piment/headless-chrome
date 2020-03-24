@@ -25,34 +25,34 @@ func main() {
 	defer allocCxl()
 	defer ctxCxl()
 
-	sourceScshoByte, err := browser.GetFullScreenshotByteByURL(ctx, sourceURL)
+	srcScshoByte, err := browser.GetFullScreenshotByteByURL(ctx, sourceURL)
 	if err != nil {
 		log.Fatal(err)
 	}
-	targetScshoByte, err := browser.GetFullScreenshotByteByURL(ctx, targetURL)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	sourceImagePath := compareOutputDir + "source/image.png"
-	targetImagePath := compareOutputDir + "target/image.png"
-	if err := image.WriteImageByByte(sourceScshoByte, sourceImagePath); err != nil {
-		log.Fatal(err)
-	}
-	if err := image.WriteImageByByte(targetScshoByte, targetImagePath); err != nil {
-		log.Fatal(err)
-	}
-	sourceImage, err := image.ReadImageByPath(sourceImagePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	targetImage, err := image.ReadImageByPath(targetImagePath)
+	tgtScshoByte, err := browser.GetFullScreenshotByteByURL(ctx, targetURL)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	resultImagePath := compareOutputDir + "result/image.png"
-	if err := image.CompareImage(sourceImage, targetImage, resultImagePath); err != nil {
+	srcImagePath := compareOutputDir + "source/image.png"
+	tgtImagePath := compareOutputDir + "target/image.png"
+	if err := image.WriteImageByByte(srcScshoByte, srcImagePath); err != nil {
+		log.Fatal(err)
+	}
+	if err := image.WriteImageByByte(tgtScshoByte, tgtImagePath); err != nil {
+		log.Fatal(err)
+	}
+	srcImage, err := image.ReadImageByPath(srcImagePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	tgtImage, err := image.ReadImageByPath(tgtImagePath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	resImagePath := compareOutputDir + "result/image.png"
+	if err := image.CompareImage(srcImage, tgtImage, resImagePath); err != nil {
 		log.Fatal(err)
 	}
 }
