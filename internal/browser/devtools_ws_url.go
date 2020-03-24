@@ -17,16 +17,14 @@ const (
 
 // GetDevtoolsEndpoint gets the string dev tools endpoint.
 func GetDevtoolsEndpoint() (string, error) {
-	devtoolsWs, error := getDevtoolsWs()
-
-	if error != nil {
-		return "", error
+	devtoolsWs, err := getDevtoolsWs()
+	if err != nil {
+		return "", err
 	}
 
-	wsDebuggerURL, error := getWsDebuggerURL(devtoolsWs)
-
-	if error != nil {
-		return "", error
+	wsDebuggerURL, err := getWsDebuggerURL(devtoolsWs)
+	if err != nil {
+		return "", err
 	}
 
 	return wsDebuggerURL, nil
@@ -35,8 +33,8 @@ func GetDevtoolsEndpoint() (string, error) {
 func getWsDebuggerURL(devtoolsWs []byte) (string, error) {
 	var devtoolsWsJSON map[string]interface{}
 
-	if error := json.Unmarshal([]byte(devtoolsWs), &devtoolsWsJSON); error != nil {
-		return "", error
+	if err := json.Unmarshal([]byte(devtoolsWs), &devtoolsWsJSON); err != nil {
+		return "", err
 	}
 
 	webSocketDebuggerURL, ok := devtoolsWsJSON["webSocketDebuggerUrl"]
@@ -55,10 +53,10 @@ func getDevtoolsWs() ([]byte, error) {
 	// TODO: modify Http.get.(Http.get could not respond)
 	devtoolsWsDomainJSONVersionPath := devtoolsWsDomain + devtoolsWsJSONVersionPath
 	cmd := exec.Command("curl", "-H", "host:", devtoolsWsDomainJSONVersionPath)
-	out, error := cmd.Output()
+	out, err := cmd.Output()
 
-	if error != nil {
-		return []byte(""), error
+	if err != nil {
+		return []byte(""), err
 	}
 
 	return out, nil
