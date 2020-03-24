@@ -45,13 +45,15 @@ func getWsDebuggerURL(devtoolsWsByte []byte) (string, error) {
 	rep := regexp.MustCompile(devtoolsWsScheme + ".*" + devtoolsEndpointPath)
 	devtoolsWsHash := rep.ReplaceAllString(webSocketDebuggerURL.(string), "")
 
-	wsDebuggerURL := devtoolsWsScheme + devtoolsWsDomain + devtoolsEndpointPath + devtoolsWsHash
+	wsDebuggerURL :=
+		devtoolsWsScheme + devtoolsWsDomain + devtoolsEndpointPath + devtoolsWsHash
 	return wsDebuggerURL, nil
 }
 
 func getDevtoolsWsByte() ([]byte, error) {
 	// TODO: modify Http.get.(Http.get could not respond)
-	devtoolsWsDomainJSONVersionPath := devtoolsWsDomain + devtoolsWsJSONVersionPath
+	devtoolsWsDomainJSONVersionPath :=
+		devtoolsWsDomain + devtoolsWsJSONVersionPath
 	cmd := exec.Command("curl", "-H", "host:", devtoolsWsDomainJSONVersionPath)
 	out, err := cmd.Output()
 

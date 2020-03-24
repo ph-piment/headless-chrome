@@ -10,6 +10,9 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
+// ScreenshotQuality is screenshot quality
+const ScreenshotQuality = 50
+
 // GetContext get context by NewRemoteAllocator.
 func GetContext() (context.Context, context.CancelFunc, context.CancelFunc) {
 	devtoolsEndpoint, err := GetDevtoolsEndpoint()
@@ -17,11 +20,12 @@ func GetContext() (context.Context, context.CancelFunc, context.CancelFunc) {
 		log.Fatal("must get devtools endpoint")
 	}
 
-	allocatorContext, allocCancel := chromedp.NewRemoteAllocator(context.Background(), devtoolsEndpoint)
+	allocCtx, allocCxl :=
+		chromedp.NewRemoteAllocator(context.Background(), devtoolsEndpoint)
 
-	ctxt, ctxtCancel := chromedp.NewContext(allocatorContext)
+	ctx, ctxCxl := chromedp.NewContext(allocCtx)
 
-	return ctxt, allocCancel, ctxtCancel
+	return ctx, allocCxl, ctxCxl
 }
 
 func fullScreenshot(url string, quality int64, res *[]byte) chromedp.Tasks {
@@ -33,7 +37,8 @@ func fullScreenshot(url string, quality int64, res *[]byte) chromedp.Tasks {
 				return err
 			}
 
-			width, height := int64(math.Ceil(contentSize.Width)), int64(math.Ceil(contentSize.Height))
+			width, height :=
+				int64(math.Ceil(contentSize.Width)), int64(math.Ceil(contentSize.Height))
 
 			err = emulation.SetDeviceMetricsOverride(width, height, 1, false).
 				WithScreenOrientation(&emulation.ScreenOrientation{
@@ -64,7 +69,7 @@ func fullScreenshot(url string, quality int64, res *[]byte) chromedp.Tasks {
 // GetFullScreenshotByteByURL get image by URL.
 func GetFullScreenshotByteByURL(ctx context.Context, url string) ([]byte, error) {
 	var buf []byte
-	if err := chromedp.Run(ctx, fullScreenshot(url, 90, &buf)); err != nil {
+	if err := chromedp.Run(ctx, fullScreenshot(url, ScreenshotQuality, &buf)); err != nil {
 		return nil, err
 	}
 	return buf, nil

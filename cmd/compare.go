@@ -21,9 +21,9 @@ func main() {
 	sourceURL := args[0]
 	targetURL := args[1]
 
-	ctx, allocCancel, ctxtCancel := browser.GetContext()
-	defer allocCancel()
-	defer ctxtCancel()
+	ctx, allocCxl, ctxCxl := browser.GetContext()
+	defer allocCxl()
+	defer ctxCxl()
 
 	sourceScreenshotByte, _ := browser.GetFullScreenshotByteByURL(ctx, sourceURL)
 	targetScreenshotByte, _ := browser.GetFullScreenshotByteByURL(ctx, targetURL)
