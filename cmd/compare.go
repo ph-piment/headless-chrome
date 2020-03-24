@@ -25,14 +25,14 @@ func main() {
 	defer allocCancel()
 	defer ctxtCancel()
 
-	sourceImageByte, _ := browser.GetImageByURL(ctx, sourceURL)
-	targetImageByte, _ := browser.GetImageByURL(ctx, targetURL)
+	sourceScreenshotByte, _ := browser.GetFullScreenshotByteByURL(ctx, sourceURL)
+	targetScreenshotByte, _ := browser.GetFullScreenshotByteByURL(ctx, targetURL)
 
 	sourceImagePath := compareOutputDir + "source/image.png"
 	targetImagePath := compareOutputDir + "target/image.png"
 	resultImagePath := compareOutputDir + "result/image.png"
-	image.WriteImageByByte(sourceImageByte, sourceImagePath)
-	image.WriteImageByByte(targetImageByte, targetImagePath)
+	image.WriteImageByByte(sourceScreenshotByte, sourceImagePath)
+	image.WriteImageByByte(targetScreenshotByte, targetImagePath)
 	sourceImage, _ := image.OpenImage(sourceImagePath)
 	targetImage, _ := image.OpenImage(targetImagePath)
 
