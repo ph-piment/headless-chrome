@@ -27,7 +27,7 @@ The processing order is as follows.
 ### Usage
 ```sh
 git clone https://github.com/ph-piment/headless-chrome.git
-cd docker
+cd deployments
 docker-compose up -d --build
 docker exec -it workspace /bin/bash
 go run ./cmd/compare.go https://www.google.com https://www.google.com
@@ -39,10 +39,8 @@ go run ./cmd/compare.go https://www.google.com https://www.google.com
 * Image comparison results.(/go/src/work/outputs/images/compare/result/image.png)
 
 ### Wish list
-* Refactor
 * Add test code
 * Parallel processing
-* Exception handling organization
 * Add circle ci
 
 ### Resources
