@@ -63,6 +63,14 @@ func CompareImage(sourceImage image.Image, targetImage image.Image, imagePath st
 		return err
 	}
 
+	if err := writeImageByImage(out, imagePath); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func writeImageByImage(img image.Image, imagePath string) error {
 	var w io.Writer
 	f, err := os.Create(imagePath)
 	if err != nil {
@@ -71,7 +79,7 @@ func CompareImage(sourceImage image.Image, targetImage image.Image, imagePath st
 	defer f.Close()
 	w = f
 
-	if err := png.Encode(w, out); err != nil {
+	if err := png.Encode(w, img); err != nil {
 		return err
 	}
 	return nil
