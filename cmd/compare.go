@@ -1,5 +1,3 @@
-// Command remote is a chromedp example demonstrating how to connect to an
-// existing Chrome DevTools instance using a remote WebSocket URL.
 package main
 
 import (

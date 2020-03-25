@@ -17,12 +17,7 @@ const (
 
 // GetDevtoolsEndpoint get the string dev tools endpoint.
 func GetDevtoolsEndpoint() (string, error) {
-	devtoolsWsByte, err := getDevtoolsWsByte()
-	if err != nil {
-		return "", err
-	}
-
-	wsDebuggerURL, err := getWsDebuggerURL(devtoolsWsByte)
+	wsDebuggerURL, err := getWsDebuggerURL(getDevtoolsWsByte())
 	if err != nil {
 		return "", err
 	}
@@ -30,17 +25,14 @@ func GetDevtoolsEndpoint() (string, error) {
 	return wsDebuggerURL, nil
 }
 
-func getDevtoolsWsByte() ([]byte, error) {
+func getDevtoolsWsByte() []byte {
 	// TODO: modify Http.get.(Http.get could not respond)
 	devtoolsWsDomainJSONVersionPath :=
 		devtoolsWsDomain + devtoolsWsJSONVersionPath
 	cmd := exec.Command("curl", "-H", "host:", devtoolsWsDomainJSONVersionPath)
-	out, err := cmd.Output()
-	if err != nil {
-		return []byte(""), err
-	}
+	out, _ := cmd.Output()
 
-	return out, nil
+	return out
 }
 
 func getWsDebuggerURL(devtoolsWsByte []byte) (string, error) {

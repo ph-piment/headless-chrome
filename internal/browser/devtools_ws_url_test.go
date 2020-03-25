@@ -1,8 +1,31 @@
 package browser
 
 import (
+	"reflect"
+	"regexp"
 	"testing"
 )
+
+func TestGetDevtoolsEndpointSuccess(t *testing.T) {
+	actual, err := GetDevtoolsEndpoint()
+	expected :=
+		"/^" + devtoolsWsScheme + devtoolsWsDomain + devtoolsEndpointPath + ".*$/"
+	if regexp.MustCompile(expected).Match([]byte(actual)) {
+		t.Errorf("got: %v\nwant: %v\n", actual, expected)
+	}
+	if err != nil {
+		t.Errorf("got error: %v\n", err)
+	}
+}
+
+func TestGetDevtoolsWsByteSuccess(t *testing.T) {
+	devtoolsWsByte := getDevtoolsWsByte()
+	actual := reflect.TypeOf(devtoolsWsByte).String()
+	expected := "[]uint8"
+	if actual != expected {
+		t.Errorf("got: %v\nwant: %v\n", actual, expected)
+	}
+}
 
 func TestGetWsDebuggerURLSuccess(t *testing.T) {
 	devtoolsWs := []byte(`
