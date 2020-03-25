@@ -30,7 +30,7 @@ git clone https://github.com/ph-piment/headless-chrome.git
 cd deployments
 docker-compose up -d --build
 docker exec -it workspace /bin/bash
-go run ./cmd/compare.go https://www.google.com https://www.google.com
+go run ./cmd/compare/main.go https://www.google.com https://www.google.com
 ```
 
 ### Outputs
