@@ -41,7 +41,6 @@ go run ./cmd/compare.go https://www.google.com https://www.google.com
 ### Wish list
 * Add test code
 * Parallel processing
-* Add circle ci
 
 ### Resources
 * https://github.com/golang-standards/project-layout
