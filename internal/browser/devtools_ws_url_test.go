@@ -2,10 +2,10 @@ package browser
 
 import (
 	"reflect"
-	"regexp"
 	"testing"
 )
 
+/*
 func TestGetDevtoolsEndpointSuccess(t *testing.T) {
 	actual, err := GetDevtoolsEndpoint()
 	expected :=
@@ -17,6 +17,7 @@ func TestGetDevtoolsEndpointSuccess(t *testing.T) {
 		t.Errorf("got error: %v\n", err)
 	}
 }
+*/
 
 func TestGetDevtoolsWsByteSuccess(t *testing.T) {
 	devtoolsWsByte := getDevtoolsWsByte()
