@@ -4,13 +4,17 @@ import (
 	"flag"
 	"log"
 
+	"work/config"
 	"work/internal/browser"
 	"work/internal/image"
 )
 
-const compareOutputDir = "/go/src/work/outputs/images/compare/"
-
 func main() {
+	conf, err := config.NewConfig("app")
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
 	flag.Parse()
 	args := flag.Args()
 	if len(args) != 2 {
@@ -32,8 +36,8 @@ func main() {
 		log.Fatal(err)
 	}
 
-	srcImagePath := compareOutputDir + "source/image.png"
-	tgtImagePath := compareOutputDir + "target/image.png"
+	srcImagePath := conf.PATH.OutputCompareDir + "source/image.png"
+	tgtImagePath := conf.PATH.OutputCompareDir + "target/image.png"
 	if err := image.WriteImageByByte(srcScshoByte, srcImagePath); err != nil {
 		log.Fatal(err)
 	}
@@ -49,7 +53,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	resImagePath := compareOutputDir + "result/image.png"
+	resImagePath := conf.PATH.OutputCompareDir + "result/image.png"
 	if err := image.CompareImage(srcImage, tgtImage, resImagePath); err != nil {
 		log.Fatal(err)
 	}
