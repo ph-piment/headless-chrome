@@ -20,10 +20,10 @@ jobs:
     working_directory: /go/src/github.com/{{ORG_NAME}}/{{REPO_NAME}}
     steps:
       - checkout
-      - run:
-          name: set GOPATH
-          command: |
-            echo "export GOPATH=/usr/local/go/bin/go" >> $BASH_ENV
+#      - run:
+#          name: set GOPATH
+#          command: |
+#            echo "export GOPATH=/usr/local/go/bin/go" >> $BASH_ENV
 
       # specify any bash command here prefixed with `run: `
       - run: go get -v -t -d ./...
