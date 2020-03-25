@@ -23,7 +23,7 @@ jobs:
       - run:
         name: set GOPATH
         command: |
-          echo "export GOPATH=/usr/local/go/bin/go"
+          echo "export GOPATH=/usr/local/go/bin/go" >> $BASH_ENV
 
       # specify any bash command here prefixed with `run: `
       - run: go get -v -t -d ./...
