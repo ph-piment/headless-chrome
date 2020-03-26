@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"strconv"
 
 	"work/config"
 	"work/internal/browser"
@@ -9,13 +11,24 @@ import (
 )
 
 func main() {
+	sourceURL := ""
+	targetURL := ""
+	index := 0
+	urlList, err := config.NewConfig("url_list")
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	for i, url := range urlList.URLLIST {
+		index = i
+		sourceURL = url.SourceURL
+		targetURL = url.TargetURL
+		fmt.Printf("index: %d, source_name: %s, target_name: %s\n", index, sourceURL, targetURL)
+	}
+
 	conf, err := config.NewConfig("app")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-
-	sourceURL := "https://www.google.com"
-	targetURL := "https://www.google.com"
 
 	ctx, allocCxl, ctxCxl := browser.GetContext()
 	defer allocCxl()
@@ -30,8 +43,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	srcImagePath := conf.PATH.OutputCompareDir + "source/image.png"
-	tgtImagePath := conf.PATH.OutputCompareDir + "target/image.png"
+	fileName := strconv.Itoa(index) + ".png"
+	srcImagePath := conf.PATH.OutputCompareDir + "source/" + fileName
+	tgtImagePath := conf.PATH.OutputCompareDir + "target/" + fileName
 	if err := image.WriteImageByByte(srcScshoByte, srcImagePath); err != nil {
 		log.Fatal(err)
 	}
@@ -47,7 +61,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	resImagePath := conf.PATH.OutputCompareDir + "result/image.png"
+	resImagePath := conf.PATH.OutputCompareDir + "result/" + fileName
 	if err := image.CompareImage(srcImage, tgtImage, resImagePath); err != nil {
 		log.Fatal(err)
 	}

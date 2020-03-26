@@ -9,12 +9,19 @@ type PathConfig struct {
 	OutputCompareDir string `toml:"output_compare_dir"`
 }
 
-// Config represents application configuration.
-type Config struct {
-	PATH PathConfig `toml:"path"`
+// URLListConfig represents system path configuration information.
+type URLListConfig struct {
+	SourceURL string `toml:"source_url"`
+	TargetURL string `toml:"target_url"`
 }
 
-const confDir = "/go/src/work/config/" //　設定ファイルへの実行ファイルからの相対パスを指定
+// Config represents application configuration.
+type Config struct {
+	PATH    PathConfig      `toml:"path"`
+	URLLIST []URLListConfig `toml:"items"`
+}
+
+const confDir = "/go/src/work/config/"
 
 // NewConfig return configuration struct.
 func NewConfig(appMode string) (Config, error) {
