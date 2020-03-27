@@ -4,9 +4,14 @@ This is my Go lang study repository.
 
 Currently, the following functions are provided.
 
-* compare.go
+* ./cmd/compare/main.go
 
   Pass the two URLs to compare and compare the images on the web page.
+  (Want to use in regression test)
+
+* ./cmd/parallel_compare/main.go
+
+  Compare the web page image from "config/url_list.toml".
   (Want to use in regression test)
 
 * register.go -> not started yet...
@@ -31,6 +36,7 @@ cd deployments
 docker-compose up -d --build
 docker exec -it workspace /bin/bash
 go run ./cmd/compare/main.go https://www.google.com https://www.google.com
+go run ./cmd/parallel_compare/main.go
 ```
 
 ### Outputs
