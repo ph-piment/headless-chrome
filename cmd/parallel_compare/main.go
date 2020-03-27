@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"strconv"
 
@@ -11,20 +10,17 @@ import (
 )
 
 func main() {
-	sourceURL := ""
-	targetURL := ""
-	index := 0
 	urlList, err := config.NewConfig("url_list")
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	for i, url := range urlList.URLLIST {
-		index = i
-		sourceURL = url.SourceURL
-		targetURL = url.TargetURL
-		fmt.Printf("index: %d, source_name: %s, target_name: %s\n", index, sourceURL, targetURL)
-	}
 
+	for i, url := range urlList.URLLIST {
+		outputDiff(url.SourceURL, url.TargetURL, i)
+	}
+}
+
+func outputDiff(sourceURL string, targetURL string, index int) {
 	conf, err := config.NewConfig("app")
 	if err != nil {
 		log.Fatal(err.Error())
