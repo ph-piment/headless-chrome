@@ -6,6 +6,6 @@ target_url = "https://www.ebay.com"
 source_url = "https://www.google.com"
 target_url = "https://www.google.com"
 
-#[[items]]
-#source_url = "https://www.yahoo.com"
-#target_url = "https://www.yahoo.com"
+[[items]]
+source_url = "https://www.yahoo.com"
+target_url = "https://www.yahoo.com"
