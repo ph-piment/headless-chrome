@@ -1,7 +1,6 @@
 package image
 
 import (
-	"flag"
 	"image"
 	"image/color"
 	"image/png"
@@ -41,20 +40,20 @@ func ReadImageByPath(path string) (image.Image, error) {
 
 // CompareImage compare sourceImage and targetImage.
 func CompareImage(sourceImage image.Image, targetImage image.Image, imagePath string) error {
-	threshold := flag.Float64("threshold", 0.1, "threshold")
-	aa := flag.Bool("aa", false, "ignore anti alias pixel")
-	alpha := flag.Float64("alpha", 0.1, "alpha")
+	threshold := 0.1
+	aa := false
+	alpha := 0.1
 	antiAliased := colorValue(color.RGBA{R: 255, G: 255})
 	diffColor := colorValue(color.RGBA{R: 255})
 	var out image.Image
 	opts := []pixelmatch.MatchOption{
-		pixelmatch.Threshold(*threshold),
-		pixelmatch.Alpha(*alpha),
+		pixelmatch.Threshold(threshold),
+		pixelmatch.Alpha(alpha),
 		pixelmatch.AntiAliasedColor(color.RGBA(antiAliased)),
 		pixelmatch.DiffColor(color.RGBA(diffColor)),
 		pixelmatch.WriteTo(&out),
 	}
-	if *aa {
+	if aa {
 		opts = append(opts, pixelmatch.IncludeAntiAlias)
 	}
 
