@@ -46,7 +46,6 @@ go run ./cmd/parallel_compare/main.go
 
 ### Wish list
 * Add test code
-* Parallel processing
 
 ### Resources
 * https://github.com/golang-standards/project-layout
