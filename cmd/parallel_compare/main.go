@@ -3,11 +3,15 @@ package main
 import (
 	"log"
 	"strconv"
+	"sync"
 
 	"work/config"
 	"work/internal/browser"
 	"work/internal/image"
 )
+
+// ThreadCntUpperLimit is upper limit of thread count.
+const ThreadCntUpperLimit = 3
 
 func main() {
 	urlList, err := config.NewConfig("url_list")
@@ -15,9 +19,19 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
+	limit := make(chan struct{}, ThreadCntUpperLimit)
+
+	var wg sync.WaitGroup
 	for i, url := range urlList.URLLIST {
-		outputDiff(url.SourceURL, url.TargetURL, i)
+		wg.Add(1)
+		go func(index int, sourceURL string, targetURL string) {
+			limit <- struct{}{}
+			defer wg.Done()
+			outputDiff(sourceURL, targetURL, index)
+			<-limit
+		}(i, url.SourceURL, url.TargetURL)
 	}
+	wg.Wait()
 }
 
 func outputDiff(sourceURL string, targetURL string, index int) {
