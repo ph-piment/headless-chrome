@@ -14,7 +14,7 @@ Currently, the following functions are provided.
   Compare the web page image from "config/url_list.toml".
   (Want to use in regression test)
 
-* register.go -> not started yet...
+* ./cmd/register/main.go -> not started yet...
 
   Register web page information in the database.
   (Want to use in scraping)
