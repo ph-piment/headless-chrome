@@ -15,7 +15,7 @@ func main() {
 	sect := "Selenium and browser control tools."
 	res, err := browser.ListAwesomeGoProjects(ctx, URL, sect)
 	if err != nil {
-		log.Fatal("could not list awesome go projects: %v", err)
+		log.Fatalf("could not list awesome go projects: %v", err)
 	}
 
 	for k, v := range res {
