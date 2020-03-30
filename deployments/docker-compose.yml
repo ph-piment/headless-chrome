@@ -5,6 +5,21 @@ networks:
     driver: bridge
 
 services:
+  postgres:
+    container_name: postgres
+    build: ../build/docker/postgres
+    volumes:
+      - ../data/postgres/data:/var/lib/postgresql/data
+      - ../data/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=sample
+      - POSTGRES_USER=sample
+      - POSTGRES_PASSWORD=sample
+    networks:
+      - backend
+
   headless-browser:
     container_name: headless-browser
     build: ../build/docker/headless-browser
