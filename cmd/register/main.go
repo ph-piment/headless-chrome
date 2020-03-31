@@ -1,12 +1,12 @@
 package main
 
 import (
-	"database/sql"
 	"log"
 
-	_ "github.com/lib/pq"
-
 	"work/internal/browser"
+
+	"github.com/jinzhu/gorm"
+	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
 func main() {
@@ -14,21 +14,23 @@ func main() {
 	defer allocCxl()
 	defer ctxCxl()
 
-	connStr := "host=postgres port=5432 user=sample password=sample dbname=sample sslmode=disable"
-	db, err := sql.Open("postgres", connStr)
+	db, err := gorm.Open("postgres", "host=postgres port=5432 user=sample dbname=sample password=sample sslmode=disable")
+	defer db.Close()
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	age := 21
-	rows, err := db.Query("SELECT $1", age)
-	column := 0
-	for rows.Next() {
-		err = rows.Scan(&column)
-	}
+	rows, err := db.Raw("SELECT ? AS num", age).Rows()
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer rows.Close()
+	column := 0
+	for rows.Next() {
+		rows.Scan(&column)
+	}
+
 	log.Printf("select :%v", column)
 
 	URL := "https://github.com/avelino/awesome-go"
