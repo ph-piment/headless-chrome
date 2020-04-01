@@ -9,11 +9,12 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
+// TPage is row for t_pages table.
 type TPage struct {
 	gorm.Model
-	Name        string `gorm:"size:255"`
-	URL         string `gorm:"size:255"`
-	Description string `gorm:"size:255"`
+	Name        string `gorm:"column:name" "size:255"`
+	URL         string `gorm:"column:url" "size:255"`
+	Description string `gorm:"column:description" "size:255"`
 }
 
 func main() {
@@ -42,9 +43,9 @@ func main() {
 	}
 
 	var TPages []TPage
-	db.Select("name, url, description").Find(&TPages)
-	for _, v := range TPages {
-		log.Printf("selected %s (%s): '%s'", v.Name, v.URL, v.Description)
+	db.Find(&TPages)
+	for k, v := range TPages {
+		log.Printf("selected %d %d %s %s %s %s %s %s", k, v.ID, v.Name, v.URL, v.Description, v.CreatedAt, v.UpdatedAt, v.DeletedAt)
 	}
 
 	db.Exec("TRUNCATE TABLE t_pages")
