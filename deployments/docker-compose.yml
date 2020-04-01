@@ -20,6 +20,16 @@ services:
     networks:
       - backend
 
+  redis:
+    container_name: redis
+    build: ../build/docker/redis
+    volumes:
+      - ../data/redis:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+
   headless-browser:
     container_name: headless-browser
     build: ../build/docker/headless-browser
