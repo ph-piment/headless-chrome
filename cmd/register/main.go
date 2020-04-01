@@ -9,6 +9,13 @@ import (
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
 
+type TPage struct {
+	gorm.Model
+	Name        string `gorm:"size:255"`
+	URL         string `gorm:"size:255"`
+	Description string `gorm:"size:255"`
+}
+
 func main() {
 	ctx, allocCxl, ctxCxl := browser.GetContext()
 	defer allocCxl()
@@ -20,19 +27,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	age := 21
-	rows, err := db.Raw("SELECT ? AS num", age).Rows()
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
-	column := 0
-	for rows.Next() {
-		rows.Scan(&column)
-	}
-
-	log.Printf("select :%v", column)
-
 	URL := "https://github.com/avelino/awesome-go"
 	sect := "Selenium and browser control tools."
 	res, err := browser.ListAwesomeGoProjects(ctx, URL, sect)
@@ -40,7 +34,18 @@ func main() {
 		log.Fatalf("could not list awesome go projects: %v", err)
 	}
 
+	var page TPage
 	for k, v := range res {
-		log.Printf("project %s (%s): '%s'", k, v.URL, v.Description)
+		log.Printf("register %s (%s): '%s'", k, v.URL, v.Description)
+		page = TPage{Name: k, URL: v.URL, Description: v.Description}
+		db.Create(&page)
 	}
+
+	var TPages []TPage
+	db.Select("name, url, description").Find(&TPages)
+	for _, v := range TPages {
+		log.Printf("selected %s (%s): '%s'", v.Name, v.URL, v.Description)
+	}
+
+	db.Exec("TRUNCATE TABLE t_pages")
 }
