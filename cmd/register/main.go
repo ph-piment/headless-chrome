@@ -50,6 +50,17 @@ func main() {
 		log.Printf("selected %d %d %s %s %s %s %s %s", k, v.ID, v.Name, v.URL, v.Description, v.CreatedAt, v.UpdatedAt, v.DeletedAt)
 	}
 
+	db.First(&page)
+	page.Name = "aaa"
+	page.URL = "bbb"
+	page.Description = "ccc"
+	db.Save(&page)
+
+	db.Find(&TPages)
+	for k, v := range TPages {
+		log.Printf("selected2 %d %d %s %s %s %s %s %s", k, v.ID, v.Name, v.URL, v.Description, v.CreatedAt, v.UpdatedAt, v.DeletedAt)
+	}
+
 	db.Exec("TRUNCATE TABLE t_pages")
 
 	client := redis.NewClient(&redis.Options{
