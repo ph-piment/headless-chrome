@@ -6,7 +6,8 @@ import (
 
 	"work/internal/browser"
 
-	"github.com/go-redis/redis"
+	"work/pkg/redis"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/postgres"
 )
@@ -50,91 +51,46 @@ func main() {
 		log.Printf("selected %d %d %s %s %s %s %s %s", k, v.ID, v.Name, v.URL, v.Description, v.CreatedAt, v.UpdatedAt, v.DeletedAt)
 	}
 
-	db.Exec("TRUNCATE TABLE t_pages")
+	db.First(&page)
+	page.Name = "aaa"
+	page.URL = "bbb"
+	page.Description = "ccc"
+	db.Save(&page)
 
-	client := redis.NewClient(&redis.Options{
-		Addr:     "redis:6379",
-		Password: "", // no password set
-		DB:       0,  // use default DB
-	})
-	fmt.Println("Redis client:", client)
+	db.Find(&TPages)
+	for k, v := range TPages {
+		log.Printf("selected2 %d %d %s %s %s %s %s %s", k, v.ID, v.Name, v.URL, v.Description, v.CreatedAt, v.UpdatedAt, v.DeletedAt)
+	}
+
+	db.Exec("TRUNCATE TABLE t_pages")
 
 	fmt.Println("---------------------------------------------------")
 	fmt.Println("Start StringGetSet")
-	StringGetSet(client)
+	stringKey := "StringGetSet_Key"
+	stringValue := "StringGetSet_Val"
+	redis.SetString(stringKey, stringValue)
+	redis.SetStringWithExpire(stringKey, stringValue, 0)
+	redis.GetString(stringKey)
 	fmt.Println("---------------------------------------------------")
 	fmt.Println("Start ListGetSet")
-	ListGetSet(client)
+	listKey := "ListGetSet_Key"
+	listValue := []string{"val1", "va2", "val3"}
+	redis.RPush(listKey, listValue)
+	redis.LPush(listKey, listValue)
+	redis.LSet(listKey, 0, "valval")
+	redis.LRange(listKey, 1, 5)
+	redis.AllRange(listKey)
+	redis.LIndex(listKey, 6)
 	fmt.Println("---------------------------------------------------")
 	fmt.Println("Start HashGetSet")
-	HashGetSet(client)
-	fmt.Println("---------------------------------------------------")
-}
-
-func StringGetSet(client *redis.Client) {
-	key := "StringGetSet_Key"
-	// Set
-	err := client.Set(key, "StringGetSet_Val", 0).Err()
-	if err != nil {
-		fmt.Println("redis.Client.Set Error:", err)
-	}
-
-	// Get
-	val, err := client.Get(key).Result()
-	if err != nil {
-		fmt.Println("redis.Client.Get Error:", err)
-	}
-	fmt.Println(val)
-}
-
-func ListGetSet(client *redis.Client) {
-	key := "ListGetSet_Key"
-	// Set
-	listVal := []string{"val1", "va2", "val3"}
-	err := client.RPush(key, listVal).Err()
-	if err != nil {
-		fmt.Println("redis.Client.RPush Error:", err)
-	}
-
-	// Get
-	// Get by lrange
-	lrangeVal, err := client.LRange(key, 0, -1).Result()
-	if err != nil {
-		fmt.Println("redis.Client.LRange Error:", err)
-	}
-	fmt.Println(lrangeVal)
-	// Get by lindex
-	lindexVal, err := client.LIndex(key, 2).Result()
-	if err != nil {
-		fmt.Println("redis.Client.LIndex Error:", err)
-	}
-	fmt.Println(lindexVal)
-}
-
-func HashGetSet(client *redis.Client) {
-	key := "HashGetSet_Key"
-	// Set
+	hashKey := "HashGetSet_Key"
 	for field, val := range map[string]string{"field1": "val1", "field2": "val2"} {
-		fmt.Println("Inserting", "field:", field, "val:", val)
-		err := client.HSet(key, field, val).Err()
+		err := redis.HSet(hashKey, field, val)
 		if err != nil {
 			fmt.Println("redis.Client.HSet Error:", err)
 		}
 	}
-
-	// Get
-	// HGet(key, field string) *StringCmd
-	hgetVal, err := client.HGet(key, "field1").Result()
-	if err != nil {
-		fmt.Println("redis.Client.HGet Error:", err)
-	}
-	fmt.Println(hgetVal)
-
-	// HGetAll
-	hgetallVal, err := client.HGetAll(key).Result()
-	if err != nil {
-		fmt.Println("redis.Client.HGetAll Error:", err)
-	}
-	// fmt.Println("reflect.TypeOf(hgetallVal):", reflect.TypeOf(hgetallVal)) // map[string]string
-	fmt.Println(hgetallVal)
+	redis.HGet(hashKey, "field2")
+	redis.HGetAll(hashKey)
+	fmt.Println("---------------------------------------------------")
 }
