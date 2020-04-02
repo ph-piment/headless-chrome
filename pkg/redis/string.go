@@ -30,3 +30,12 @@ func GetString(key string) (string, error) {
 	}
 	return val, nil
 }
+
+// DelString delete string from redis.
+func DelString(key string) error {
+	err := GetClient().Del(key).Err()
+	if err != nil {
+		return err
+	}
+	return nil
+}
