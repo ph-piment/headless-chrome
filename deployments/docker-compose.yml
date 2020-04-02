@@ -5,6 +5,54 @@ networks:
     driver: bridge
 
 services:
+  postgres:
+    container_name: postgres
+    build: ../build/docker/postgres
+    volumes:
+      - ../data/postgres/data:/var/lib/postgresql/data
+      - ../data/postgres/docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=sample
+      - POSTGRES_USER=sample
+      - POSTGRES_PASSWORD=sample
+    networks:
+      - backend
+
+  pgadmin4: # pgadmin4(http://localhost:16543/) root:root
+    container_name: pgadmin4
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "root"
+      PGADMIN_DEFAULT_PASSWORD: "root"
+    ports:
+      - "16543:80"
+    hostname: pgadmin4
+    restart: always
+    networks:
+      - backend
+
+  redis:
+    container_name: redis
+    build: ../build/docker/redis
+    volumes:
+      - ../data/redis:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - backend
+
+  redis-commander: # redis gui tool(http://localhost:8081/)
+    container_name: redis-commander
+    image: rediscommander/redis-commander:latest
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - '8081:8081'
+    networks:
+      - backend
+
   headless-browser:
     container_name: headless-browser
     build: ../build/docker/headless-browser
