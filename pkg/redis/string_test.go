@@ -65,7 +65,7 @@ func TestSetStringWithExpireFailed(t *testing.T) {
 	if setErr != nil {
 		t.Errorf("got error: %v\n", setErr)
 	}
-	time.Sleep(time.Duration(waitSecond) * time.Second)
+	time.Sleep(time.Duration(waitSecond+1) * time.Second)
 	actual, getErr := GetString(key)
 	if actual == expected {
 		t.Errorf("got: %v\nwant: %v\n", actual, expected)
