@@ -30,6 +30,16 @@ services:
     networks:
       - backend
 
+  redis-commander: # redis gui tool from http://localhost:8081/
+    container_name: redis-commander
+    image: rediscommander/redis-commander:latest
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - '8081:8081'
+    networks:
+      - backend
+
   headless-browser:
     container_name: headless-browser
     build: ../build/docker/headless-browser
