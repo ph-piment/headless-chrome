@@ -14,6 +14,7 @@ jobs:
       # - image: circleci/postgres:9.4
 
       - image: redis:latest
+        name: redis
 
     #### TEMPLATE_NOTE: go expects specific checkout path representing url
     #### expecting it in the form of
