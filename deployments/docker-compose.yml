@@ -20,6 +20,19 @@ services:
     networks:
       - backend
 
+  pgadmin4: # pgadmin4(http://localhost:16543/) root:root
+    container_name: pgadmin4
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "root"
+      PGADMIN_DEFAULT_PASSWORD: "root"
+    ports:
+      - "16543:80"
+    hostname: pgadmin4
+    restart: always
+    networks:
+      - backend
+
   redis:
     container_name: redis
     build: ../build/docker/redis
@@ -30,7 +43,7 @@ services:
     networks:
       - backend
 
-  redis-commander: # redis gui tool from http://localhost:8081/
+  redis-commander: # redis gui tool(http://localhost:8081/)
     container_name: redis-commander
     image: rediscommander/redis-commander:latest
     environment:
